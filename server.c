@@ -30,9 +30,9 @@ void *handleConnection(void* pClientSocket){
     int bytesRead;
 
     //read client's message --
-    while(bytesRead = read(clientSocket, buffer, sizeof(buffer)) > 0) {
+    while(bytesRead = read(clientSocket, buffer, sizeof(buffer)) == 0) {
         //if(buffer[bytesRead-1] == '\n') break;
-        break;
+        //break;
     }
     check(bytesRead, "Recieve error");
     buffer[bytesRead-1] = 0; //remove the \n
@@ -40,7 +40,7 @@ void *handleConnection(void* pClientSocket){
     printf("Reveiced: %s\n", buffer);
     fflush(stdout);
 
-
+    realpath(buffer, actualPath);
     FILE *fp = fopen(actualPath, "r");
     if(fp == NULL) {
 
@@ -70,7 +70,7 @@ int main(int argc, char const *argv[])
     check((serverSocket = socket(AF_INET, SOCK_STREAM, 0)),"Failed to create socket");
 
     serverAddr.sin_family = AF_INET;
-    serverAddr.sin_addr.s_addr = inet_addr("127.0.0.1");//INADDR_ANY;
+    serverAddr.sin_addr.s_addr = INADDR_ANY;
     serverAddr.sin_port = htons(SERVERPORT);
 
     check(bind(serverSocket, (struct sockaddr*)&serverAddr, sizeof(serverAddr)), "Bind Failed");

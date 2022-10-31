@@ -30,16 +30,19 @@ int main(int argc, char const *argv[])
 
     //inet_pton(AF_INET, "127.0.0.1", &serverAddr.sin_addr);
 
-    check((connect(serverSocket, (struct sockaddr*)&serverAddr, (socklen_t*)sizeof(serverAddr) != 0)),
+    check((connect(serverSocket, (struct sockaddr*)&serverAddr, sizeof(serverAddr))),
         "Falied to connect to server");
        
 
-    char buffer[BUFSIZE];
+    char buffer[BUFSIZE] = {0};
     strcpy(buffer, "cartier_catalog.txt");
+    printf("%s", buffer);
     write(serverSocket, buffer, sizeof(buffer));
-    while(read(serverSocket, buffer, sizeof(buffer)) > 0){
-        printf("%s\n", buffer);
-        buffer[0] = 0;
+    while(1){
+        while(read(serverSocket, buffer, sizeof(buffer)) > 0){
+            printf("%s\n", buffer);
+            buffer[0] = 0;
+        }
     }
     return 0;
 }
