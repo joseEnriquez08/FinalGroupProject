@@ -19,9 +19,12 @@
 #include <sys/stat.h>
 #include <fcntl.h>  
 #include <pthread.h>
+#include <limits.h>
 //#include <sys/pthreads.h>
 
-//title,genre,rating,summary
+#define SERVERPORT 1024
+#define BUFSIZE 4086
+
 struct Array{
     char str[50];
     int length;
