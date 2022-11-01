@@ -8,6 +8,13 @@
 
 #define SOCKETERROR (-1)
 #define SERVER_BACKLOG 100
+#define THREAD_POOL_SIZE 20
+
+pthread_t threadPool[THREAD_POOL_SIZE];
+pthread_mutex_t queueLock = PTHREAD_MUTEX_INITIALIZER;
+
+//condition variables let threads wait for some condition to occur
+pthread_cond_t conditionVar = PTHREAD_COND_INITIALIZER;
 
 struct sockaddr_in serverAddr;
 struct sockaddr SA;
@@ -58,6 +65,27 @@ void *handleConnection(void* pClientSocket){
 
 }
 
+void *threadFunc(void *arg){
+    while(1){
+        int *pclient;
+        pthread_mutex_lock(&queueLock);
+        
+
+        if((pclient = dequeue()) == NULL){
+            //no clients to handle
+
+            //so thread waits
+            pthread_cond_wait(&conditionVar, &queueLock);
+            pclient = dequeue();
+        }
+        pthread_mutex_unlock(&queueLock);
+
+        if(pclient != NULL){
+            handleConnection(pclient);
+        }
+    }
+}
+
 int main(int argc, char const *argv[])
 {
     /* code */
@@ -66,6 +94,16 @@ int main(int argc, char const *argv[])
     int addrSize;
     
     struct sockaddr_in clientAddr;
+
+    //Had to change stack size for each thread. Otherwize, id be getting a segementation fault error on my system.
+    int stackSize = PTHREAD_STACK_MIN * 15;
+    pthread_attr_t att;
+    pthread_attr_init(&att);
+    pthread_attr_setstacksize(&att, stackSize);
+
+    for(int i = 0; i < THREAD_POOL_SIZE; i++){
+        pthread_create(&threadPool[i], &att, threadFunc, NULL);
+    }
 
     check((serverSocket = socket(AF_INET, SOCK_STREAM, 0)),"Failed to create socket");
 
@@ -76,11 +114,7 @@ int main(int argc, char const *argv[])
     check(bind(serverSocket, (struct sockaddr*)&serverAddr, sizeof(serverAddr)), "Bind Failed");
     check(listen(serverSocket, SERVER_BACKLOG), "Listen Failed");
 
-    //Had to change stack size for each thread. Otherwize, id be getting a segementation fault error on my system.
-    int stackSize = PTHREAD_STACK_MIN * 15;
-    pthread_attr_t att;
-    pthread_attr_init(&att);
-    pthread_attr_setstacksize(&att, stackSize);
+    
 
     while(1) {
         printf("Waiting for connections... \n");
@@ -90,11 +124,18 @@ int main(int argc, char const *argv[])
         check(clientSocket = accept(serverSocket, (struct sockaddr*) &clientAddr, (socklen_t*)&addrSize), "accept failed");
         printf("Connected\n");
 
-        //do stuff with connection
-        pthread_t thread;
+        //put connection somewhere to use it latyer
         int *pclient = malloc(sizeof(int));
         *pclient = clientSocket;
-        pthread_create(&thread, &att, handleConnection, pclient);
+        pthread_mutex_lock(&queueLock);
+        enqueue(pclient);
+        pthread_cond_signal(&conditionVar);
+        pthread_mutex_unlock(&queueLock);
+        //do stuff with connection
+        // pthread_t thread;
+        // int *pclient = malloc(sizeof(int));
+        // *pclient = clientSocket;
+        // pthread_create(&thread, &att, handleConnection, pclient);
     }
 
 
