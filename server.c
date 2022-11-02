@@ -31,35 +31,88 @@ int check(int exp, const char *message){
 void *handleConnection(void* pClientSocket){
     int clientSocket = *((int*)pClientSocket);
     free(pClientSocket);
-    char buffer[BUFSIZE];
+    char buffer[BUFSIZE] = {0};
     int messageSize = 0;
     char actualPath[PATH_MAX+1];
     int bytesRead;
 
+    //client output when shop assitant/thread is free to handle client/customer
+    sprintf(buffer, "Welcome to the shop..\n\n"
+        "I am Shop Assistant #%d currently serving you.\n\n"
+        "What would you like to do today? Please choose the option below:\n\n"
+        "1. Looking at the jewelry menu\n"
+        "2. Making specific jewelry inguiry\n"
+        "3. Making purchase\n"
+        "4. Returning the purchase\n"
+        "5. Exit\n", 1);
+
+    //printf("%s", buffer);
+
+    //writing to client:
+    check(write(clientSocket, buffer, sizeof(buffer)), "Sending/Writing failed");
+    buffer[0] = 0;
+
+    while(1){
+
+        //reading from client
+        while(read(clientSocket, buffer, sizeof(buffer)) == 0){
+
+        }
+
+        if(strcmp(buffer, "1") == 0){
+            printf("Customer chose: 1. Looking at the jewelry menu\n");
+        }
+
+        if(strcmp(buffer, "2") == 0){
+            printf("Customer chose: 2. Making specific jewelry inguiry\n");
+        }
+
+        if(strcmp(buffer, "3") == 0){
+            printf("Customer chose: 3. Making purchase\n");
+        }
+
+        if(strcmp(buffer, "4") == 0){
+            printf("Customer chose: 4. Returning the purchase\n");
+        }
+
+        if(strcmp(buffer, "5") == 0){
+            printf("Customer chose: 5. Exit\n");
+            close(clientSocket);
+            printf("closing connection\n");
+            return NULL;
+            
+        }
+        buffer[0] = 0;
+        fflush(stdout);
+    }
+    //check(read(clientSocket, buffer, sizeof(buffer)), "Recieving/Reading failed");
+    //printf("%s", buffer);
+
+    
     //read client's message --
-    while(bytesRead = read(clientSocket, buffer, sizeof(buffer)) == 0) {
+    //while(bytesRead = read(clientSocket, buffer, sizeof(buffer)) == 0) {
         //if(buffer[bytesRead-1] == '\n') break;
         //break;
-    }
-    check(bytesRead, "Recieve error");
-    buffer[bytesRead-1] = 0; //remove the \n
+    //}
+    //check(bytesRead, "Recieve error");
+    //buffer[bytesRead-1] = 0; //remove the \n
 
-    printf("Reveiced: %s\n", buffer);
-    fflush(stdout);
+    //printf("Reveiced: %s\n", buffer);
+    //fflush(stdout);
 
-    realpath(buffer, actualPath);
-    FILE *fp = fopen(actualPath, "r");
-    if(fp == NULL) {
+    //realpath(buffer, actualPath);
+    //FILE *fp = fopen(actualPath, "r");
+    //if(fp == NULL) {
 
-     return NULL;   
-    }
+    // return NULL;   
+    //}
 
     //read file and send them to client
-    while((bytesRead = fread(buffer, 1, BUFSIZE, fp)) > 0){
-        write(clientSocket, buffer, bytesRead);
-    }
+    //while((bytesRead = fread(buffer, 1, BUFSIZE, fp)) > 0){
+    //    write(clientSocket, buffer, bytesRead);
+    //}
     close(clientSocket);
-    fclose(fp);
+    //fclose(fp);
     printf("closing connection\n");
     return NULL;
 
@@ -111,6 +164,9 @@ int main(int argc, char const *argv[])
     serverAddr.sin_addr.s_addr = INADDR_ANY;
     serverAddr.sin_port = htons(SERVERPORT);
 
+    int reuse = 1;
+    setsockopt(serverSocket, SOL_SOCKET, SO_REUSEADDR, (const char*)&reuse, sizeof(reuse));
+
     check(bind(serverSocket, (struct sockaddr*)&serverAddr, sizeof(serverAddr)), "Bind Failed");
     check(listen(serverSocket, SERVER_BACKLOG), "Listen Failed");
 
@@ -121,7 +177,8 @@ int main(int argc, char const *argv[])
 
         addrSize = sizeof(serverAddr);
 
-        check(clientSocket = accept(serverSocket, (struct sockaddr*) &clientAddr, (socklen_t*)&addrSize), "accept failed");
+        check(clientSocket = accept(serverSocket, (struct sockaddr*) &clientAddr, (socklen_t*)&addrSize),
+            "accept failed");
         printf("Connected\n");
 
         //put connection somewhere to use it latyer
@@ -131,6 +188,7 @@ int main(int argc, char const *argv[])
         enqueue(pclient);
         pthread_cond_signal(&conditionVar);
         pthread_mutex_unlock(&queueLock);
+
         //do stuff with connection
         // pthread_t thread;
         // int *pclient = malloc(sizeof(int));

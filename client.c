@@ -6,6 +6,8 @@
 
 #include "include.h"
 
+
+
 int check(int exp, const char *message){
     if(exp == -1){
         perror(message);
@@ -30,19 +32,63 @@ int main(int argc, char const *argv[])
 
     //inet_pton(AF_INET, "127.0.0.1", &serverAddr.sin_addr);
 
+  
+
     check((connect(serverSocket, (struct sockaddr*)&serverAddr, sizeof(serverAddr))),
         "Falied to connect to server");
-       
-
+    
     char buffer[BUFSIZE] = {0};
-    strcpy(buffer, "cartier_catalog.txt");
-    printf("%s", buffer);
-    write(serverSocket, buffer, sizeof(buffer));
-    while(1){
-        while(read(serverSocket, buffer, sizeof(buffer)) > 0){
-            printf("%s\n", buffer);
-            buffer[0] = 0;
-        }
+    int readInput = 0;
+
+    //reading from server
+    while(read(serverSocket, buffer, sizeof(buffer)) == 0){
+            //read(serverSocket, buffer, sizeof(buffer));
     }
+    
+    printf("%s", buffer);
+
+    while(1){
+
+        //writing to server
+        buffer[0] = 0;
+        fgets(buffer, sizeof(buffer), stdin);
+        buffer[strlen(buffer)-1] = '\0';
+        write(serverSocket, buffer, sizeof(buffer));
+
+        if(strcmp(buffer, "1") == 0){
+            printf("Customer chose: 1. Looking at the jewelry menu\n");
+        }
+
+        if(strcmp(buffer, "2") == 0){
+            printf("Customer chose: 2. Making specific jewelry inguiry\n");
+        }
+
+        if(strcmp(buffer, "3") == 0){
+            printf("Customer chose: 3. Making purchase\n");
+        }
+
+        if(strcmp(buffer, "4") == 0){
+            printf("4. Returning the purchase\n");
+        }
+
+        if(strcmp(buffer, "5") == 0){
+            return 0;
+        }
+
+        fflush(stdout);
+        buffer[0] = 0;
+    } 
+    
+    
+    //printf("%d", 0|POLL_IN);
+    //strcpy(buffer, "cartier_catalog.txt");
+    //printf("%s", buffer);
+    //write(serverSocket, buffer, sizeof(buffer));
+    // while(1){
+    //     while(read(serverSocket, buffer, sizeof(buffer)) > 0){
+    //         printf("%s\n", buffer);
+    //         buffer[0] = 0;
+    //     }
+    // }
     return 0;
 }

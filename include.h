@@ -20,6 +20,7 @@
 #include <fcntl.h>  
 #include <pthread.h>
 #include <limits.h>
+#include <poll.h>
 //#include <sys/pthreads.h>
 
 #define SERVERPORT 1024
