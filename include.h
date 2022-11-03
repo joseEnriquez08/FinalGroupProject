@@ -19,9 +19,19 @@
 #include <sys/stat.h>
 #include <fcntl.h>  
 #include <pthread.h>
+#include <limits.h>
+#include <poll.h>
 //#include <sys/pthreads.h>
 
-//title,genre,rating,summary
+#define SERVERPORT 1024
+#define BUFSIZE 4086
+
+struct node {
+    struct node* next;
+    int *clientSocket;
+    //int index
+};
+
 struct Array{
     char str[50];
     int length;
@@ -41,6 +51,8 @@ struct item{
 
 //global functions
 extern struct item* parseData();
+extern void enqueue(int *clientSocket);
+extern int* dequeue();
 
 
 
