@@ -15,6 +15,7 @@
 //#define threadPoolSize 20
 
 // will be initialized by command line arguments
+int shopAssitants;
 int threadPoolSize;
 int sofaAmount;
 int maxCustomers;
@@ -176,10 +177,10 @@ int main(int argc, char const *argv[])
     items = parseData();
 
     //command line arguments
-    threadPoolSize = strtol(argv[1], NULL, 10);
+    shopAssitants = strtol(argv[1], NULL, 10);
     sofaAmount = strtol(argv[2], NULL, 10);
     maxCustomers = strtol(argv[3], NULL, 10);
-    //threadPoolSize = shop
+    threadPoolSize = shopAssitants + sofaAmount + maxCustomers;
 
     pthread_t threadPool [threadPoolSize];
 
@@ -232,7 +233,9 @@ int main(int argc, char const *argv[])
         int *pclient = malloc(sizeof(int));
         *pclient = clientSocket;
 
-        //if(getQueueSize() > ())
+        // if(getQueueSize() > ()){
+
+        // }
         //beacause all threads are sharing the same queue structure, we have to sycnhronize enqueuing and dequeueing
         pthread_mutex_lock(&queueLock);
 

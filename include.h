@@ -33,7 +33,7 @@ struct node {
     int *clientSocket;
     //id
     //int size
-    int index
+    int index;
 };
 
 struct Array{
