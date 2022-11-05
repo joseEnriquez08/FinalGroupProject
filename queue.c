@@ -7,6 +7,7 @@
 
 struct node *head = NULL;
 struct node *tail = NULL;
+int qSize = 0;
 
 void enqueue(int *clientSocket){
     struct node *newNode = malloc(sizeof(struct node));
@@ -19,6 +20,7 @@ void enqueue(int *clientSocket){
     }
 
     tail= newNode;
+    qSize++;
 }
 
 int* dequeue() {
@@ -32,8 +34,13 @@ int* dequeue() {
             tail = NULL;
         }
         free(temp);
+        qSize--;
         return result;
     }
+}
+
+int getQueueSize(){
+    return qSize;
 }
 
 // int main(int argc, char const *argv[])

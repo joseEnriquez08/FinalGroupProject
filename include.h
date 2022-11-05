@@ -26,10 +26,14 @@
 #define SERVERPORT 1024
 #define BUFSIZE 4086
 
+
+
 struct node {
     struct node* next;
     int *clientSocket;
-    //int index
+    //id
+    //int size
+    int index
 };
 
 struct Array{
@@ -49,10 +53,13 @@ struct item{
     int length;
 };
 
+extern struct item *items;
+
 //global functions
 extern struct item* parseData();
 extern void enqueue(int *clientSocket);
 extern int* dequeue();
+extern int getQueueSize();
 
 
 
