@@ -44,40 +44,69 @@ int main(int argc, char const *argv[])
     while(read(serverSocket, buffer, sizeof(buffer)) == 0){
             //read(serverSocket, buffer, sizeof(buffer));
     }
+
+    int setting = strtol(buffer, NULL, 10);
+    buffer[0] = 0;
     
-    printf("%s", buffer);
+    if(setting == 0){
+        //handled by shop assitant
 
-    while(1){
-
-        //writing to server
-        buffer[0] = 0;
-        fgets(buffer, sizeof(buffer), stdin);
-        buffer[strlen(buffer)-1] = '\0';
-        write(serverSocket, buffer, sizeof(buffer));
-
-        if(strcmp(buffer, "1") == 0){
-            printf("Customer chose: 1. Looking at the jewelry menu\n");
+        while(read(serverSocket, buffer, sizeof(buffer)) == 0){
+            //read(serverSocket, buffer, sizeof(buffer));
         }
+        printf("%s", buffer);
+        while(1){
 
-        if(strcmp(buffer, "2") == 0){
-            printf("Customer chose: 2. Making specific jewelry inguiry\n");
+            //writing to server
+            buffer[0] = 0;
+            fgets(buffer, sizeof(buffer), stdin);
+            buffer[strlen(buffer)-1] = '\0';
+            write(serverSocket, buffer, sizeof(buffer));
+
+            if(strcmp(buffer, "1") == 0){
+                printf("Customer chose: 1. Looking at the jewelry menu\n");
+            }
+
+            if(strcmp(buffer, "2") == 0){
+                printf("Customer chose: 2. Making specific jewelry inguiry\n");
+            }
+
+            if(strcmp(buffer, "3") == 0){
+                printf("Customer chose: 3. Making purchase\n");
+            }
+
+            if(strcmp(buffer, "4") == 0){
+                printf("4. Returning the purchase\n");
+            }
+
+            if(strcmp(buffer, "5") == 0){
+                return 0;
+            }
+
+            fflush(stdout);
+            buffer[0] = 0;
         }
+    }
+    if(setting == 1){   
+        //handled by sofa
+    }
+    if(setting == 2){
+        //handled by waiting room
+    }
+    if(setting == 3){
+        //no room in shop getting booted
 
-        if(strcmp(buffer, "3") == 0){
-            printf("Customer chose: 3. Making purchase\n");
+        while(read(serverSocket, buffer, sizeof(buffer)) == 0){
+            //read(serverSocket, buffer, sizeof(buffer));
         }
+        printf("%s", buffer);
+        return 0;
+    }
+    
+    
+    
 
-        if(strcmp(buffer, "4") == 0){
-            printf("4. Returning the purchase\n");
-        }
-
-        if(strcmp(buffer, "5") == 0){
-            return 0;
-        }
-
-        fflush(stdout);
-        buffer[0] = 0;
-    } 
+    
     
     
     //printf("%d", 0|POLL_IN);

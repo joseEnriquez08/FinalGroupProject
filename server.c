@@ -14,6 +14,8 @@
 #define SERVER_BACKLOG 100
 //#define threadPoolSize 20
 
+int clientAmount = 0;
+
 // will be initialized by command line arguments
 int shopAssitants;
 int threadPoolSize;
@@ -55,6 +57,11 @@ void *handleConnection(void* pClientSocket){
     int messageSize = 0;
     char actualPath[PATH_MAX+1];
     int bytesRead;
+
+    sprintf(buffer, "%d", 0);
+    check(write(clientSocket, buffer, sizeof(buffer)), "Sending/Writing failed");
+    buffer[0] = 0;
+    fflush(stdout);
 
     //client output when shop assitant/thread is free to handle client/customer
     sprintf(buffer, "Welcome to the shop..\n\n"
@@ -100,6 +107,7 @@ void *handleConnection(void* pClientSocket){
             printf("Customer chose: 5. Exit\n");
             close(clientSocket);
             printf("closing connection\n");
+            clientAmount--;
             return NULL;
             
         }
@@ -168,6 +176,30 @@ void *threadFunc(void *arg){
     }
 }
 
+void disconnectClientDueToFullRoom(int *clientSocket){
+
+    char buffer[BUFSIZE] = {0};
+    int messageSize = 0;
+    char actualPath[PATH_MAX+1];
+    int bytesRead;
+
+    sprintf(buffer, "%d", 3);
+    check(write(*clientSocket, buffer, sizeof(buffer)), "Sending/Writing failed");
+    buffer[0] = 0;
+    fflush(stdout);
+
+    sprintf(buffer, "Sorry, the waiting room is full.. We will not be able to serve you at the moment.\n\n"
+                "Please check back later.. Thank you..");
+    check(write(*clientSocket, buffer, sizeof(buffer)), "Sending/Writing failed");
+    buffer[0] = 0;
+    fflush(stdout);
+
+    close(*clientSocket);
+    free(clientSocket);
+    printf("closing connection\n");
+
+}
+
 /// @brief creates the multithreaded server
 /// @param argc amount of command line arguments
 /// @param argv array of command line arguments
@@ -233,16 +265,25 @@ int main(int argc, char const *argv[])
         int *pclient = malloc(sizeof(int));
         *pclient = clientSocket;
 
-        // if(getQueueSize() > ()){
+        if(clientAmount >= threadPoolSize){
+            //there is no space available in the shop, need to disconnect client.
+            printf("%d > %d\n", clientAmount, threadPoolSize);
+            disconnectClientDueToFullRoom(pclient);
 
-        // }
-        //beacause all threads are sharing the same queue structure, we have to sycnhronize enqueuing and dequeueing
-        pthread_mutex_lock(&queueLock);
+        } else {
+            clientAmount++;
+            //there is space available in the shop
+            printf("%d <= %d\n", clientAmount, threadPoolSize);
+            //beacause all threads are sharing the same queue structure, we have to sycnhronize enqueuing and dequeueing
+            pthread_mutex_lock(&queueLock);
 
-        //stores the client socket in the queue
-        enqueue(pclient);
-        pthread_cond_signal(&conditionVar);
-        pthread_mutex_unlock(&queueLock);
+            //stores the client socket in the queue
+            enqueue(pclient);
+            
+            pthread_cond_signal(&conditionVar);
+            pthread_mutex_unlock(&queueLock);
+        }
+        
 
     }
 
