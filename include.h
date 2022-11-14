@@ -9,11 +9,11 @@
 #include <unistd.h>
 #include <errno.h>
 #include <sys/types.h>
-#include <sys/wait.h>    // for wait
-#include <errno.h>      // for system error numbers
-#include <sys/ipc.h>    // Used by IPC messages, shared memory and semaphores
-#include <sys/msg.h>    // for message queue structures
-#include <string.h>     // for string operation: strlen
+#include <sys/wait.h>    
+#include <errno.h>      
+#include <sys/ipc.h>    
+#include <sys/msg.h>   
+#include <string.h>   
 #include <ctype.h>
 #include <fcntl.h>
 #include <sys/stat.h>
@@ -21,27 +21,31 @@
 #include <pthread.h>
 #include <limits.h>
 #include <poll.h>
-//#include <sys/pthreads.h>
+
 
 #define SERVERPORT 1024
 #define BUFSIZE 4086
 
 
-
+//model for client node
 struct node {
     struct node* next;
     int *clientSocket;
     //id
     //int size
     int index;
+    int beingHandledByShopAssistant;
+    int beingHandledBySofa;
+    int beingHandledByRoom;
 };
 
+//dynamic array
 struct Array{
     char str[50];
     int length;
 };
 
-//ref	category	title	tags	description	quantity	price
+//model for items
 struct item{
     char ref[50];
     char category[50];
@@ -58,8 +62,13 @@ extern struct item *items;
 //global functions
 extern struct item* parseData();
 extern void enqueue(int *clientSocket);
-extern int* dequeue();
+extern struct node* dequeue();
 extern int getQueueSize();
+extern struct node* getNextNonHandleBySofa();
+extern struct node* peek();
+extern int getQueueSize();
+extern int removeNode(int index);
+extern void printQ();
 
 
 
