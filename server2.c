@@ -33,6 +33,36 @@ int check(int exp, const char *message){
     return exp;
 }
 
+ssize_t fullwrite(int fd, const void *buf, size_t len){
+	size_t total = 0;
+	const char *p = buf;
+	while(total < len){
+		ssize_t r = write(fd, p + total, len -total);
+		switch (r) {
+		case -1: return -1;
+		case 0: return total;
+		default: total += r;
+	
+		}
+	}
+	return total;
+}
+
+ssize_t fullread(int fd, void *buf, size_t len){
+	size_t total = 0;
+	char *p = buf;
+	while(total < len){
+		ssize_t r = read(fd, p+total, len-total);
+		switch(r){
+			case -1: return -1;
+			case 0: return total;
+			default: total += r;
+		}
+	}
+
+	return total;
+}
+
 
 /// @brief handles clients that are connected to a shop assitant thread
 /// @param pClientSocket //the client socket of client
@@ -46,21 +76,22 @@ void *handleConnection(void* pClientSocket, int shopAssitantID){
     while(1){
 
         //stops and waits for client input from client
-        while(read(clientSocket, buffer, sizeof(buffer)) == 0){
+        // while( == 0){
 
-        }
+        // }
+        fullread(clientSocket, buffer, sizeof(buffer));
 
         if(strcmp(buffer, "1") == 0){
             printf("Customer chose: 1. Looking at the jewelry menu\n");
 
             //loop to send data.
             for(int i = 0; i< items->length; i++){
-                sprintf(buffer, "Item %d: %s\t%s\t%s\t%s\t%s\t%s\t%s\n", i,
+                sprintf(buffer, "Item %d: %s\t%s\t%s\t%s\t%s\t%s\n", i,
                     items[i].ref, items[i].title, items[i].tags,
                     items[i].description, items[i].quantity, items[i].price);
 
                 printf("sending: %s", buffer);
-                check(write(clientSocket, buffer, sizeof(buffer)), "Sending/Writing failed");
+                check(fullwrite(clientSocket, buffer, sizeof(buffer)), "Sending/Writing failed");
             }
         }
 

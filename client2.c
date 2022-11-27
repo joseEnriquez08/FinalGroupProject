@@ -13,6 +13,36 @@ int check(int exp, const char *message){
     return exp;
 }
 
+ssize_t fullwrite(int fd, const void *buf, size_t len){
+	size_t total = 0;
+	const char *p = buf;
+	while(total < len){
+		ssize_t r = write(fd, p + total, len -total);
+		switch (r) {
+		case -1: return -1;
+		case 0: return total;
+		default: total += r;
+	
+		}
+	}
+	return total;
+}
+
+ssize_t fullread(int fd, void *buf, size_t len){
+	size_t total = 0;
+	char *p = buf;
+	while(total < len){
+		ssize_t r = read(fd, p+total, len-total);
+		switch(r){
+			case -1: return -1;
+			case 0: return total;
+			default: total += r;
+		}
+	}
+
+	return total;
+}
+
 
 int main(int argc, char const *argv[])
 {
@@ -39,7 +69,7 @@ int main(int argc, char const *argv[])
         buffer[0] = 0;
         fgets(buffer, sizeof(buffer), stdin);
         buffer[strlen(buffer)-1] = '\0';
-        write(serverSocket, buffer, sizeof(buffer));
+        fullwrite(serverSocket, buffer, sizeof(buffer));
         
 
         if(strcmp(buffer, "1") == 0){
@@ -47,9 +77,10 @@ int main(int argc, char const *argv[])
             
             //loop to receive data
             for(int i = 0; i < 46; i++){
-                while(read(serverSocket, buffer, sizeof(buffer)) == 0){
+                // while(read(serverSocket, buffer, sizeof(buffer)) == 0){
         
-                }
+                // }
+                fullread(serverSocket, buffer, sizeof(buffer));
                 printf("%s",buffer);
                 buffer[0] = 0;
                 //fflush(stdin);

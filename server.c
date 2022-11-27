@@ -74,6 +74,36 @@ int check(int exp, const char *message){
     return exp;
 }
 
+ssize_t fullwrite(int fd, const void *buf, size_t len){
+	size_t total = 0;
+	const char *p = buf;
+	while(total < len){
+		ssize_t r = write(fd, p + total, len -total);
+		switch (r) {
+		case -1: return -1;
+		case 0: return total;
+		default: total += r;
+	
+		}
+	}
+	return total;
+}
+
+ssize_t fullread(int fd, void *buf, size_t len){
+	size_t total = 0;
+	char *p = buf;
+	while(total < len){
+		ssize_t r = read(fd, p+total, len-total);
+		switch(r){
+			case -1: return -1;
+			case 0: return total;
+			default: total += r;
+		}
+	}
+
+	return total;
+}
+
 /// @brief handles clients that are connected to a shop assitant thread
 /// @param pClientSocket //the client socket of client
 /// @param shopAssitantId // the id of a shgop assitant
@@ -134,6 +164,7 @@ void *handleConnection(void* pClientSocket, int shopAssitantID){
 
             sprintf(buffer, "You have been removed from the shop\n");
             check(write(clientSocket, buffer, sizeof(buffer)), "Sending/Writing failed");
+			//check(fullWrite(clientSocket, buffer, sizeof(buffer)), "Sending/Writing failed");
             close(clientSocket);
             printf("closing connection\n");
             clientAmount--;
