@@ -141,7 +141,7 @@ void *handleConnection(void* pClientSocket, int shopAssitantID){
           
           //client output when shop assitant is free to handle client/customer
           char client_qus[1000];
-          sprintf(buffer, "Welcome to the shop..\n\n"
+          sprintf(client_qus, "\n\nWelcome to the shop..\n\n"
               "I am Shop Assistant #%d currently serving you.\n\n"
               "What would you like to do today? Please choose the option below:\n\n"
               "1. Looking at the jewelry menu\n"
