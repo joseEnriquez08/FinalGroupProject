@@ -70,6 +70,11 @@ extern int getQueueSize();
 extern int removeNode(int index);
 extern void printQ();
 
+extern void getAllItems();
+
+extern int check(int exp, const char *message);
+extern void printItems(struct item *items);
+
 
 
 

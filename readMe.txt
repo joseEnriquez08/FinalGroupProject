@@ -4,11 +4,11 @@
 *Make sure to make only the necessary functions global in incldue.h. 
 
 
-To compile server.c: gcc -lpthread parseData.c queue.c server.c
-To run server:       ./a.out 2 2 1
+To compile server.c: gcc -lpthread menuFunctions.c parseData.c queue.c server.c -o server.out
+To run server:       ./server.out 2 2 1
 
-To compile client.c: gcc -lpthread parseData.c client.c
-To run client: a.out
+To compile client.c: gcc -lpthread parseData.c client.c -o client.out
+To run client: ./client.out
 
 Try -pthread if -lpthread doesnt work
 

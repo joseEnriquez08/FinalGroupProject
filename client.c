@@ -38,6 +38,7 @@ int main(int argc, char const *argv[])
     char buffer[BUFSIZE] = {0};
     int readInput = 0;
 
+    printf("Item: %ld, Buffzise: %d", sizeof(struct item), BUFSIZE);
     
     while(1){
 
@@ -66,9 +67,19 @@ int main(int argc, char const *argv[])
                 fgets(buffer, sizeof(buffer), stdin);
                 buffer[strlen(buffer)-1] = '\0';
                 write(serverSocket, buffer, sizeof(buffer));
+                
 
                 if(strcmp(buffer, "1") == 0){
-                    printf("Customer chose: 1. Looking at the jewelry menu\n");
+                    buffer[0] = 0;
+                    //printf("Customer chose: 1. Looking at the jewelry menu\n");
+                    for(int i = 0; i < 46; i++){
+                        while(read(serverSocket, buffer, sizeof(buffer)) == 0){
+                
+                        }
+                        printf("%s",buffer);
+                        buffer[0] = 0;
+                        //fflush(stdin);
+                    }
                 }
 
                 if(strcmp(buffer, "2") == 0){

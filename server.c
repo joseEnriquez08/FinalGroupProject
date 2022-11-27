@@ -112,6 +112,8 @@ void *handleConnection(void* pClientSocket, int shopAssitantID){
 
         if(strcmp(buffer, "1") == 0){
             printf("Customer chose: 1. Looking at the jewelry menu\n");
+            getAllItems(clientSocket);
+            //printItems(items);
             
         }
 
@@ -356,7 +358,7 @@ void disconnectClientDueToFullRoom(int *clientSocket){
 int main(int argc, char const *argv[])
 {
     //initialize the data to be shared among the threads
-    //items = parseData();
+    items = parseData();
 
     //command line arguments
     shopAssitants = strtol(argv[1], NULL, 10);
@@ -379,7 +381,7 @@ int main(int argc, char const *argv[])
     pthread_attr_setstacksize(&att, stackSize);
 
     //creates threads based on the amount of shop assitants
-    for(int i = 0; i < 2; i++){
+    for(int i = 0; i < shopAssitants; i++){
         pthread_create(&threadPool[i], &att, threadFuncShopAssitant, NULL);
     }
 
