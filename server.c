@@ -114,7 +114,7 @@ void *handleConnection(void* pClientSocket, int shopAssitantID){
 
     //sends 0 to the client notifying them thaty are being handled by a shop assitant
     sprintf(buffer, "%d", 0);
-    check(write(clientSocket, buffer, sizeof(buffer)), "Sending/Writing failed");
+    check(fullwrite(clientSocket, buffer, sizeof(buffer)), "Sending/Writing failed");
     buffer[0] = 0;
     fflush(stdout);
 
@@ -129,16 +129,17 @@ void *handleConnection(void* pClientSocket, int shopAssitantID){
         "5. Exit\n", shopAssitantID);
 
     //writing to client:
-    check(write(clientSocket, buffer, sizeof(buffer)), "Sending/Writing failed");
+    check(fullwrite(clientSocket, buffer, sizeof(buffer)), "Sending/Writing failed");
     buffer[0] = 0;
 
     //loop to conituously and infinitely read from client
     while(1){
 
         //stops and waits for client input from client
-        while(read(clientSocket, buffer, sizeof(buffer)) == 0){
+        // while(fullread(clientSocket, buffer, sizeof(buffer)) == 0){
 
-        }
+        // }
+        fullread(clientSocket, buffer, sizeof(buffer));
 
         if(strcmp(buffer, "1") == 0){
             printf("Customer chose: 1. Looking at the jewelry menu\n");
@@ -149,6 +150,7 @@ void *handleConnection(void* pClientSocket, int shopAssitantID){
 
         if(strcmp(buffer, "2") == 0){
             printf("Customer chose: 2. Making specific jewelry inguiry\n");
+            getItemInfo(clientSocket);
         }
 
         if(strcmp(buffer, "3") == 0){
@@ -163,7 +165,7 @@ void *handleConnection(void* pClientSocket, int shopAssitantID){
             printf("Customer chose: 5. Exit\n");
 
             sprintf(buffer, "You have been removed from the shop\n");
-            check(write(clientSocket, buffer, sizeof(buffer)), "Sending/Writing failed");
+            check(fullwrite(clientSocket, buffer, sizeof(buffer)), "Sending/Writing failed");
 			//check(fullWrite(clientSocket, buffer, sizeof(buffer)), "Sending/Writing failed");
             close(clientSocket);
             printf("closing connection\n");
@@ -237,7 +239,7 @@ void removeClient(struct node *client){
     int clientSocket = *(client->clientSocket);
     char buffer[BUFSIZE] = {0};
     sprintf(buffer, "You have been removed from the shop\n");
-    check(write(clientSocket, buffer, sizeof(buffer)), "Sending/Writing failed");
+    check(fullwrite(clientSocket, buffer, sizeof(buffer)), "Sending/Writing failed");
     buffer[0] = 0;
     fflush(stdout);
 
@@ -314,7 +316,7 @@ void *threadFuncSofa(void *arg){
             //sends 1 to the client notifying them they are being handled by a sofa
             char buffer[BUFSIZE] = {0};
             sprintf(buffer, "%d", 1);
-            check(write(clientSocket, buffer, sizeof(buffer)), "Sending/Writing failed");
+            check(fullwrite(clientSocket, buffer, sizeof(buffer)), "Sending/Writing failed");
             buffer[0] = 0;
             fflush(stdout);
 
@@ -326,14 +328,15 @@ void *threadFuncSofa(void *arg){
                 "Do you want to wait or want to leave the shop?\n"
                 "Enter 0 for waiting or 1 to leave\n", clientNode->index+1, sofaID);
 
-            check(write(clientSocket, buffer, sizeof(buffer)), "Sending/Writing failed");
+            check(fullwrite(clientSocket, buffer, sizeof(buffer)), "Sending/Writing failed");
             buffer[0] = 0;
             fflush(stdout);
 
             //stops and waits for client input
-            while(read(clientSocket, buffer, sizeof(buffer)) == 0){
+            // while(read(clientSocket, buffer, sizeof(buffer)) == 0){
 
-            }
+            // }
+            read(clientSocket, buffer, sizeof(buffer));
             printf("Reach\n"); 
 
             if(strcmp(buffer, "0") == 0){
@@ -364,7 +367,7 @@ void disconnectClientDueToFullRoom(int *clientSocket){
     //sends the client 3 to tell them they are being disconnected
     char buffer[BUFSIZE] = {0};
     sprintf(buffer, "%d", 3);
-    check(write(*clientSocket, buffer, sizeof(buffer)), "Sending/Writing failed");
+    check(fullwrite(*clientSocket, buffer, sizeof(buffer)), "Sending/Writing failed");
     buffer[0] = 0;
     fflush(stdout);
 
@@ -372,7 +375,7 @@ void disconnectClientDueToFullRoom(int *clientSocket){
     //sends goodbye messade to client
     sprintf(buffer, "Sorry, the waiting room is full.. We will not be able to serve you at the moment.\n\n"
                 "Please check back later.. Thank you..");
-    check(write(*clientSocket, buffer, sizeof(buffer)), "Sending/Writing failed");
+    check(fullwrite(*clientSocket, buffer, sizeof(buffer)), "Sending/Writing failed");
     buffer[0] = 0;
     fflush(stdout);
 

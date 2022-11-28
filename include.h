@@ -70,10 +70,15 @@ extern int getQueueSize();
 extern int removeNode(int index);
 extern void printQ();
 
-extern void getAllItems();
+extern void getAllItems(int clientSocket);
+extern void getItemInfo(int clientSocket);
 
 extern int check(int exp, const char *message);
 extern void printItems(struct item *items);
+
+extern ssize_t fullwrite(int fd, const void *buf, size_t len);
+extern ssize_t fullread(int fd, void *buf, size_t len);
+
 
 
 

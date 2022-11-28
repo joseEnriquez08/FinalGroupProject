@@ -18,6 +18,36 @@ int check(int exp, const char *message){
     return exp;
 }
 
+ssize_t fullwrite(int fd, const void *buf, size_t len){
+	size_t total = 0;
+	const char *p = buf;
+	while(total < len){
+		ssize_t r = write(fd, p + total, len -total);
+		switch (r) {
+		case -1: return -1;
+		case 0: return total;
+		default: total += r;
+	
+		}
+	}
+	return total;
+}
+
+ssize_t fullread(int fd, void *buf, size_t len){
+	size_t total = 0;
+	char *p = buf;
+	while(total < len){
+		ssize_t r = read(fd, p+total, len-total);
+		switch(r){
+			case -1: return -1;
+			case 0: return total;
+			default: total += r;
+		}
+	}
+
+	return total;
+}
+
 
 int main(int argc, char const *argv[])
 {
@@ -38,14 +68,16 @@ int main(int argc, char const *argv[])
     char buffer[BUFSIZE] = {0};
     int readInput = 0;
 
-    printf("Item: %ld, Buffzise: %d", sizeof(struct item), BUFSIZE);
+    //printf("Item: %ld, Buffzise: %d", sizeof(struct item), BUFSIZE);
     
     while(1){
 
         ///reading from server to determine what the client is being handled by
-        while(read(serverSocket, buffer, sizeof(buffer)) == 0){
+        // while(read(serverSocket, buffer, sizeof(buffer)) == 0){
             
-        }
+        // }
+
+        fullread(serverSocket, buffer, sizeof(buffer));
         int setting = strtol(buffer, NULL, 10);
         buffer[0] = 0;
         
@@ -53,9 +85,10 @@ int main(int argc, char const *argv[])
             //handled by shop assitant
 
             //reading from server
-            while(read(serverSocket, buffer, sizeof(buffer)) == 0){
+            // while(read(serverSocket, buffer, sizeof(buffer)) == 0){
                 
-            }
+            // }
+            fullread(serverSocket, buffer, sizeof(buffer));
             //display server message
             printf("%s", buffer);
 
@@ -66,16 +99,17 @@ int main(int argc, char const *argv[])
                 buffer[0] = 0;
                 fgets(buffer, sizeof(buffer), stdin);
                 buffer[strlen(buffer)-1] = '\0';
-                write(serverSocket, buffer, sizeof(buffer));
+                fullwrite(serverSocket, buffer, sizeof(buffer));
                 
 
                 if(strcmp(buffer, "1") == 0){
                     buffer[0] = 0;
                     //printf("Customer chose: 1. Looking at the jewelry menu\n");
                     for(int i = 0; i < 46; i++){
-                        while(read(serverSocket, buffer, sizeof(buffer)) == 0){
+                        // while(read(serverSocket, buffer, sizeof(buffer)) == 0){
                 
-                        }
+                        // }
+                        fullread(serverSocket, buffer, sizeof(buffer));
                         printf("%s",buffer);
                         buffer[0] = 0;
                         //fflush(stdin);
@@ -83,7 +117,21 @@ int main(int argc, char const *argv[])
                 }
 
                 if(strcmp(buffer, "2") == 0){
-                    printf("Customer chose: 2. Making specific jewelry inguiry\n");
+                    //printf("Customer chose: 2. Making specific jewelry inguiry\n");
+
+                    fullread(serverSocket, buffer, sizeof(buffer));
+                    printf("%s", buffer);
+
+                    buffer[0] = 0;
+                    fgets(buffer, sizeof(buffer), stdin);
+                    buffer[strlen(buffer)-1] = '\0';
+                    fullwrite(serverSocket, buffer, sizeof(buffer));
+                    buffer[0] = 0;
+
+                    fullread(serverSocket, buffer, sizeof(buffer));
+                    printf("\n%s\n", buffer);
+                    buffer[0] = 0;
+
                 }
 
                 if(strcmp(buffer, "3") == 0){
@@ -95,9 +143,10 @@ int main(int argc, char const *argv[])
                 }
 
                 if(strcmp(buffer, "5") == 0){
-                    while(read(serverSocket, buffer, sizeof(buffer)) == 0){
+                    // while(read(serverSocket, buffer, sizeof(buffer)) == 0){
                         
-                    }
+                    // }
+                    fullread(serverSocket, buffer, sizeof(buffer));
                     //display server message
                     printf("%s", buffer);
                     return 0;
@@ -111,9 +160,10 @@ int main(int argc, char const *argv[])
             //handled by sofa
 
             //read from server
-            while(read(serverSocket, buffer, sizeof(buffer)) == 0){
-                //read(serverSocket, buffer, sizeof(buffer));
-            }
+            // while(read(serverSocket, buffer, sizeof(buffer)) == 0){
+            //     //read(serverSocket, buffer, sizeof(buffer));
+            // }
+            fullread(serverSocket, buffer, sizeof(buffer));
             printf("%s", buffer);
             fflush(stdout);
             buffer[0] = 0;
@@ -121,7 +171,7 @@ int main(int argc, char const *argv[])
             //client chooses to either leave or wait and sends responce to server
             fgets(buffer, sizeof(buffer), stdin);
             buffer[strlen(buffer)-1] = '\0';
-            write(serverSocket, buffer, sizeof(buffer));
+            fullwrite(serverSocket, buffer, sizeof(buffer));
             fflush(stdout);
             //buffer[0] = 0;
 
@@ -130,9 +180,10 @@ int main(int argc, char const *argv[])
             }
             if(strcmp(buffer, "1") == 0){
                 //client wants to leave
-                while(read(serverSocket, buffer, sizeof(buffer)) == 0){
+                // while(read(serverSocket, buffer, sizeof(buffer)) == 0){
                
-                }
+                // }
+                fullread(serverSocket, buffer, sizeof(buffer));
                 printf("%s", buffer);
                 fflush(stdout);
                 return 0;
@@ -144,9 +195,11 @@ int main(int argc, char const *argv[])
         if(setting == 3){
             //no room in shop getting booted or you chose to leave
 
-            while(read(serverSocket, buffer, sizeof(buffer)) == 0){
-                //read(serverSocket, buffer, sizeof(buffer));
-            }
+            // while(read(serverSocket, buffer, sizeof(buffer)) == 0){
+            //     //read(serverSocket, buffer, sizeof(buffer));
+            // }
+            //printf("Cllient reach 3");
+            fullread(serverSocket, buffer, sizeof(buffer));
             printf("%s", buffer);
             return 0;
         }
