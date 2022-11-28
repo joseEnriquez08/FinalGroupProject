@@ -60,9 +60,6 @@ int main(int argc, char const *argv[])
 
           char regmsg[150];
 
-//           sprintf(regmsg,"REG:");
-//           sendto(sockfd, (const char *)regmsg, sizeof(regmsg),0, (const struct sockaddr *) &serveraddr,sizeof(serveraddr));
-
 
         	while(1){
 
@@ -73,17 +70,29 @@ int main(int argc, char const *argv[])
             	write(serverSocket, buffer, sizeof(buffer));
 
             	if(strcmp(buffer, "1") == 0){
-                	printf("Customer chose: 1. Looking at the jewelry menu\n");
+                	printf("Customer chose: 1. Looking at the jewelry menu\n");fflush(stdin);
+
+                char other_buf[1000];
+                for(int i = 0; i < 47; i++){
+                
+                while(read(serverSocket, other_buf, sizeof(other_buf)) == 0){
+        
+                }
+                printf("%s",other_buf);fflush(stdout);
+
+                }
+                buffer[0] = 0;
             	}
 
             	if(strcmp(buffer, "2") == 0){
-                	printf("Customer chose: 2. Making specific jewelry inguiry\n");
+                	printf("Customer chose: 2. Making specific jewelry inguiry\n");fflush(stdin);
+
                 // Added by Venkata Ragavendra Vavilthota
                 // Get the reference number from client
                   char buf[10];
                   printf("Enter ref Item to get more details:\n");
                   scanf("%s", buf);
-                
+
                   // send the data to server
                   write(serverSocket, buf, sizeof(buf));
                   char client_rcvmsg[1000];
@@ -92,7 +101,7 @@ int main(int argc, char const *argv[])
                 	}
                 	//display reference data from server
                 	printf("%s", client_rcvmsg);
-                  
+
                   char server_msg[1000];
                   while(read(serverSocket, server_msg, sizeof(server_msg)) == 0){
 
@@ -102,19 +111,19 @@ int main(int argc, char const *argv[])
             	}
 
             	if(strcmp(buffer, "3") == 0){
-                	printf("Customer chose: 3. Making purchase\n");
+                	printf("Customer chose: 3. Making purchase\n");fflush(stdin);
             	}
 
             	if(strcmp(buffer, "4") == 0){
-                	printf("4. Returning the purchase\n");
+                	printf("4. Returning the purchase\n");fflush(stdin);
             	}
 
             	if(strcmp(buffer, "5") == 0){
                 	while(read(serverSocket, buffer, sizeof(buffer)) == 0){
-                   	 
+
                 	}
                 	//display server message
-                	printf("%s", buffer);
+                	printf("This is %s", buffer);fflush(stdin);
                 	return 0;
             	}
 
@@ -147,7 +156,7 @@ int main(int argc, char const *argv[])
         	if(strcmp(buffer, "1") == 0){
             	//client wants to leave
             	while(read(serverSocket, buffer, sizeof(buffer)) == 0){
-          	 
+                
             	}
             	printf("%s", buffer);
             	fflush(stdout);
