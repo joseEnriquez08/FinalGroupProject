@@ -74,6 +74,13 @@ int check(int exp, const char *message){
     return exp;
 }
 
+/// @brief From research, Apparently the kernal will sometimes decide to not send all the data when reading and writing.
+///         SO i wrote a function modeling the normal write/read functions that will make sure that full data gets sent,
+///         This avoiding partial reads/writes. The loop will continuously send/recieve data until the number of bytes sent/received matches len
+/// @param fd the socket to send data to
+/// @param buf the buffer contaning the data to be sent
+/// @param len the number of bytes that need to be sent
+/// @return the number of bvytes sent
 ssize_t fullwrite(int fd, const void *buf, size_t len){
 	size_t total = 0;
 	const char *p = buf;
@@ -89,6 +96,13 @@ ssize_t fullwrite(int fd, const void *buf, size_t len){
 	return total;
 }
 
+/// @brief From research, Apparently the kernal will sometimes decide to not send all the data when reading and writing.
+///         SO i wrote a function modeling the normal write/read functions that will make sure that full data gets sent,
+///         This avoiding partial reads/writes. The loop will continuously send/receive data until the number of bytes sent/received matches len
+/// @param fd the socket to read data from
+/// @param buf the buffer to store the data
+/// @param len the number of bytes that need to be read
+/// @return the number of bytes read
 ssize_t fullread(int fd, void *buf, size_t len){
 	size_t total = 0;
 	char *p = buf;
@@ -104,6 +118,23 @@ ssize_t fullread(int fd, void *buf, size_t len){
 	return total;
 }
 
+/// @brief intitialize items array to keep track of a single clients' purchases/returns
+/// @param arr to be initialized
+void initializeItemsArray(struct item arr[]){
+    int size = 46;
+    char buffer[BUFSIZE] = {0};
+    sprintf(buffer, "0");
+
+    //copies global store inventory to client inventory
+    memcpy(arr, items, sizeof(struct item)*46);
+
+    //sets all item's quanity in client inventory to 0 
+    for(int i = 0; i < size; i++){
+        strcpy(arr[i].quantity, buffer);
+        arr[i].length = size;
+    }
+}
+
 /// @brief handles clients that are connected to a shop assitant thread
 /// @param pClientSocket //the client socket of client
 /// @param shopAssitantId // the id of a shgop assitant
@@ -111,6 +142,12 @@ void *handleConnection(void* pClientSocket, int shopAssitantID){
     int clientSocket = *((int*)pClientSocket);
     free(pClientSocket);
     char buffer[BUFSIZE] = {0};
+
+    struct item clientPurchases[46];
+    initializeItemsArray(clientPurchases);
+    //printItems(clientPurchases);
+    
+
 
     //sends 0 to the client notifying them thaty are being handled by a shop assitant
     sprintf(buffer, "%d", 0);
@@ -131,14 +168,14 @@ void *handleConnection(void* pClientSocket, int shopAssitantID){
     //writing to client:
     check(fullwrite(clientSocket, buffer, sizeof(buffer)), "Sending/Writing failed");
     buffer[0] = 0;
+    
 
     //loop to conituously and infinitely read from client
     while(1){
 
-        //stops and waits for client input from client
-        // while(fullread(clientSocket, buffer, sizeof(buffer)) == 0){
+        
 
-        // }
+        //reads client output
         fullread(clientSocket, buffer, sizeof(buffer));
 
         if(strcmp(buffer, "1") == 0){
@@ -155,10 +192,15 @@ void *handleConnection(void* pClientSocket, int shopAssitantID){
 
         if(strcmp(buffer, "3") == 0){
             printf("Customer chose: 3. Making purchase\n");
+            makePurchase(clientSocket, clientPurchases);
+            printItems(clientPurchases);
+            
         }
 
         if(strcmp(buffer, "4") == 0){
             printf("Customer chose: 4. Returning the purchase\n");
+            returnItem(clientSocket, clientPurchases);
+            //printItems(clientPurchases);
         }
 
         if(strcmp(buffer, "5") == 0){

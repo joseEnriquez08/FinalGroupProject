@@ -1,7 +1,8 @@
 //Author: Jose Enriquez
 //Email: jose.enriquez@okstate.edu
 //Date: 10/25/2022
-//Description: TBD
+//Description: Reads and parses the file from cartier_catalog and stores it into 
+//              an easy to use array of structs
 
 #include "include.h"
 

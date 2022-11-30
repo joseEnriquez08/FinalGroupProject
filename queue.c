@@ -1,15 +1,20 @@
 //Author: Jose Enriquez
 //Email: jose.enriquez@okstate.edu
 //Date: 10/25/2022
-//Description: TBD
+//Description: Implements Queue like structure using linked a linked list. Helps in adding the first come first serve functionality
 
+//Note may have to make queue structurse so we can make multiple queues instead of just one 
 #include "include.h"
+
 
 struct node *head = NULL;
 struct node *tail = NULL;
 int qSize = 0;
 
+/// @brief makes a client node and puts it at the end of the queue
+/// @param clientSocket 
 void enqueue(int *clientSocket){
+    //creates and initializes a new node
     struct node *newNode = malloc(sizeof(struct node));
     newNode->clientSocket = clientSocket;
     newNode->next = NULL;
@@ -17,27 +22,39 @@ void enqueue(int *clientSocket){
     newNode->beingHandledBySofa = 0;
     newNode->beingHandledByRoom = 0;
     newNode->index = qSize;
+
     if(tail == NULL){
+        //queue is empty
         head = newNode;
     } else {
+        //queue is not empty
         tail->next = newNode;
     }
 
+    //updates tail q size
     tail= newNode;
     qSize++;
 }
 
+/// @brief removes node at the front of the queue
 struct node* dequeue() {
     if(head == NULL){
+        //queue is empty 
         return NULL;
     } else {
-        //int *result = head->clientSocket;
+        //queue is not empty
+
+        //node to return
         struct node *temp = head;
+        //updates head and disconncets old head;
         head = head->next;
         if(head == NULL) {
+            //queue only had one node. need to update tail
             tail = NULL;
         }
 
+        //case: queue had more than one node and need to update the index variable(waiting spot) in each node
+        //this makes it different than the traditional queue, since dequeue is now O(N);
         struct node *temp2 = head;
         while(temp2 != NULL){
             temp2->index--;
@@ -46,18 +63,22 @@ struct node* dequeue() {
 
         qSize--;
         return temp;
-        
-        //return result;
     }
 }
 
+
+/// @brief removes node from specific index
+/// @param index of node to be removed
+/// @return 
 int removeNode(int index){
     struct node *temp = head;
     struct node *prev = NULL;
 
     if(temp != NULL && temp->index == index){
+        //index was 0, removing head
         head = head->next;
 
+        //update index variable of the rest of the heads
         struct node *temp2 = head;
         while(temp2 != NULL){
             temp2->index--;
@@ -67,6 +88,8 @@ int removeNode(int index){
         return 0;
     }
 
+
+    //loop to find the specific node
     while(temp != NULL && temp->index != index){
         prev = temp;
         temp = temp->next;
@@ -81,6 +104,8 @@ int removeNode(int index){
     // Unlink the node from linked list
     prev->next = temp->next;
     struct node *temp2 = prev->next;
+
+    //update index variable of the rest of the heads
     while(temp2 != NULL){
         temp2->index--;
         temp2 = temp2->next;
@@ -88,10 +113,12 @@ int removeNode(int index){
     qSize--;
 }
 
+/// @return size of queue 
 int getQueueSize(){
     return qSize;
 }
 
+/// @brief prints the queue
 void printQ(){
     struct node *temp = head;
     while(temp != NULL){
@@ -103,6 +130,7 @@ void printQ(){
     printf("\n");
 }
 
+/// @brief get the next node not being handled by a sofa
 struct node* getNextNonHandleBySofa(){
     if(head == NULL){
         return NULL;
@@ -117,6 +145,7 @@ struct node* getNextNonHandleBySofa(){
     }
 }
 
+/// @brief retursns head of queue without removing
 struct node* peek(){
     return head;
 }
