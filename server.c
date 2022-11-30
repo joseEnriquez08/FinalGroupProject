@@ -121,26 +121,42 @@ void *handleConnection(void* pClientSocket, int shopAssitantID){
     	if(strcmp(buffer, "1") == 0){
         	printf("Customer chose: 1. Looking at the jewelry menu\n");fflush(stdout);
 
+
             //loop to send data.
             char buffer_other[1000];
-            for(int i = 0; i< 48; i++){
+            for(int i = 0; i< 47; i++){
 sprintf(buffer_other,"\n%s\t%s\t%s\t%s\t%s\t%d\n",catalogstr[i].ref,catalogstr[i].category,catalogstr[i].title,catalogstr[i].tags,catalogstr[i].description,catalogstr[i].price);
 
 //                 printf("sending: %s", buffer_other);
                 check(write(clientSocket, buffer_other, sizeof(buffer_other)), "Sending/Writing failed");
             }
+        
+          //client output when shop assitant is free to handle client/customer
+          char client_qus[1000];
+          sprintf(client_qus, "\n\nPlease choose the option below:\n\n"
+              "1. Looking at the jewelry menu\n"
+              "2. Making specific jewelry inguiry\n"
+              "3. Making purchase\n"
+              "4. Returning the purchase\n"
+              "5. Exit\n");
+
+          //writing to client about Client response
+          check(write(clientSocket, client_qus, sizeof(client_qus)), "Sending/Writing failed");
+          buffer[0] = 0;
+
 
     	}
 
     	if(strcmp(buffer, "2") == 0){
         	printf("Customer chose: 2. Making specific jewelry inquiry\n");fflush(stdout);
+        
           // Added by Venkata Ragavendra Vavilthota
           // Getting client ref number
           char client_ref[20];
           while(read(clientSocket, client_ref, sizeof(client_ref)) == 0){
 
           }
-          printf("This is client reference number %s",client_ref);
+          printf("This is client reference number %s\n",client_ref);
           char sendDetails[1000] = {123};
 
     			struct Catalog CatalogStruct =  getJewelfunc(client_ref);      sprintf(sendDetails,"Ref\tCategory\tTitle\tTags\tDescription\tPrice\n%s\t%s\t%s\t%s\t%s\t%d",CatalogStruct.ref,CatalogStruct.category,CatalogStruct.title,CatalogStruct.tags,CatalogStruct.description,CatalogStruct.price);
@@ -150,14 +166,12 @@ sprintf(buffer_other,"\n%s\t%s\t%s\t%s\t%s\t%d\n",catalogstr[i].ref,catalogstr[i
 
           //client output when shop assitant is free to handle client/customer
           char client_qus[1000];
-          sprintf(client_qus, "\n\nWelcome to the shop..\n\n"
-              "I am Shop Assistant #%d currently serving you.\n\n"
-              "What would you like to do today? Please choose the option below:\n\n"
+          sprintf(client_qus, "\n\nPlease choose the option below:\n\n"
               "1. Looking at the jewelry menu\n"
               "2. Making specific jewelry inguiry\n"
               "3. Making purchase\n"
               "4. Returning the purchase\n"
-              "5. Exit\n", shopAssitantID);
+              "5. Exit\n");
 
           //writing to client about Client response
           check(write(clientSocket, client_qus, sizeof(client_qus)), "Sending/Writing failed");
@@ -168,10 +182,64 @@ sprintf(buffer_other,"\n%s\t%s\t%s\t%s\t%s\t%d\n",catalogstr[i].ref,catalogstr[i
 
     	if(strcmp(buffer, "3") == 0){
         	printf("Customer chose: 3. Making purchase\n");fflush(stdout);
+        
+          // Added by Venkata Ragavendra Vavilthota
+          // Getting client ref number
+          char client_buy[20];
+          while(read(clientSocket, client_buy, sizeof(client_buy)) == 0){
+
+          }
+          printf("This is client reference number to buy is %s\n",client_buy);
+        
+          char buy_details[1000];
+          sprintf(buy_details,"Bought");
+          // Sending the reference details
+          check(write(clientSocket, buy_details, sizeof(buy_details)), "Sending/Writing failed");
+    
+          //client output when shop assitant is free to handle client/customer
+          char client_qus[1000];
+          sprintf(client_qus, "\n\nPlease choose the option below:\n\n"
+              "1. Looking at the jewelry menu\n"
+              "2. Making specific jewelry inguiry\n"
+              "3. Making purchase\n"
+              "4. Returning the purchase\n"
+              "5. Exit\n");
+
+          //writing to client about Client response
+          check(write(clientSocket, client_qus, sizeof(client_qus)), "Sending/Writing failed");
+          buffer[0] = 0;
+        // Added by Venkata Ragavendra Vavilthota
+
     	}
 
     	if(strcmp(buffer, "4") == 0){
         	printf("Customer chose: 4. Returning the purchase\n");fflush(stdout);
+        
+          // Added by Venkata Ragavendra Vavilthota
+          // Getting client ref number
+          char client_return[20];
+          while(read(clientSocket, client_return, sizeof(client_return)) == 0){
+
+          }
+          printf("This is client reference number to buy is %s\n",client_return);
+          // Sending the return details
+          char return_details[1000];
+          sprintf(return_details," Reurned");
+          check(write(clientSocket, return_details, sizeof(return_details)), "Sending/Writing failed");
+        
+          //client output when shop assitant is free to handle client/customer
+          char client_qus[1000];
+          sprintf(client_qus, "\n\nPlease choose the option below:\n\n"
+              "1. Looking at the jewelry menu\n"
+              "2. Making specific jewelry inguiry\n"
+              "3. Making purchase\n"
+              "4. Returning the purchase\n"
+              "5. Exit\n");
+
+          //writing to client about Client response
+          check(write(clientSocket, client_qus, sizeof(client_qus)), "Sending/Writing failed");
+          buffer[0] = 0;
+        // Added by Venkata Ragavendra Vavilthota
     	}
 
     	if(strcmp(buffer, "5") == 0){
@@ -183,7 +251,7 @@ sprintf(buffer_other,"\n%s\t%s\t%s\t%s\t%s\t%d\n",catalogstr[i].ref,catalogstr[i
         	printf("closing connection\n");
         	clientAmount--;
         	return NULL;
-       	 
+
     	}
     	buffer[0] = 0;
     	fflush(stdout);

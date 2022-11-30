@@ -74,7 +74,7 @@ int main(int argc, char const *argv[])
                 
                 // Added by Venkata Ragavendra Vavilthota
                 char other_buf[1000];
-                for(int i = 0; i < 48; i++){
+                for(int i = 0; i < 47; i++){
                 
                 while(read(serverSocket, other_buf, sizeof(other_buf)) == 0){
         
@@ -82,6 +82,12 @@ int main(int argc, char const *argv[])
                 printf("%s",other_buf);
 
                 }
+                
+                  char server_msg[1000];
+                  while(read(serverSocket, server_msg, sizeof(server_msg)) == 0){
+
+                	}
+                  printf("%s", server_msg);
                 
                 // Added by Venkata Ragavendra Vavilthota
             	}
@@ -91,12 +97,12 @@ int main(int argc, char const *argv[])
 
                 // Added by Venkata Ragavendra Vavilthota
                 // Get the reference number from client
-                  char buf[10];
+                  char buf_ref[10];
                   printf("Enter ref Item to get more details:\n");
-                  scanf("%s", buf);
+                  scanf("%s", buf_ref);
 
                   // send the data to server
-                  write(serverSocket, buf, sizeof(buf));
+                  write(serverSocket, buf_ref, sizeof(buf_ref));
                   char client_rcvmsg[1000];
                 	while(read(serverSocket, client_rcvmsg, sizeof(client_rcvmsg)) == 0){
 
@@ -117,11 +123,58 @@ int main(int argc, char const *argv[])
             	if(strcmp(buffer, "3") == 0){
                 	printf("Customer chose: 3. Making purchase\n");
                 
+                // Added by Venkata Ragavendra Vavilthota
+                // Get the reference number to buy from client
+                  char buf_buy[10];
+                  printf("Enter ref Item to buy:\n");
+                  scanf("%s", buf_buy);
+
+                  // send the data to server
+                  write(serverSocket, buf_buy, sizeof(buf_buy));
+                
+                  char client_buymsg[1000];
+                	while(read(serverSocket, client_buymsg, sizeof(client_buymsg)) == 0){
+
+                	}
+                	//display reference data from server
+                	printf("%s", client_buymsg);
+                
+                // Read question from server
+                 char server_msg[1000];
+                  while(read(serverSocket, server_msg, sizeof(server_msg)) == 0){
+
+                	}
+                  printf("%s", server_msg);
+                // Added by Venkata Ragavendra Vavilthota
+                
             	}
 
             	if(strcmp(buffer, "4") == 0){
                 	printf("4. Returning the purchase\n");
                 
+                // Added by Venkata Ragavendra Vavilthota
+                // Get the reference number to return from client
+                  char buf_ret[10];
+                  printf("Enter ref Item to return:\n");
+                  scanf("%s", buf_ret);
+
+                  // send the data to server
+                  write(serverSocket, buf_ret, sizeof(buf_ret));
+                
+                  char client_retmsg[1000];
+                	while(read(serverSocket, client_retmsg, sizeof(client_retmsg)) == 0){
+
+                	}
+                	//display reference data from server
+                	printf("%s", client_retmsg);
+                
+                //Read the ques from sever
+                 char server_msg[1000];
+                  while(read(serverSocket, server_msg, sizeof(server_msg)) == 0){
+
+                	}
+                  printf("%s", server_msg);
+                // Added by Venkata Ragavendra Vavilthota
 
             	}
 
@@ -130,7 +183,7 @@ int main(int argc, char const *argv[])
 
                 	}
                 	//display server message
-                	printf("This is %s", buffer);
+                	printf("%s", buffer);
                 
                 	return 0;
             	}
