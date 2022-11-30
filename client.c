@@ -70,22 +70,24 @@ int main(int argc, char const *argv[])
             	write(serverSocket, buffer, sizeof(buffer));
 
             	if(strcmp(buffer, "1") == 0){
-                	printf("Customer chose: 1. Looking at the jewelry menu\n");fflush(stdin);
-
+                	printf("Customer chose: 1. Looking at the jewelry menu\n");
+                
+                // Added by Venkata Ragavendra Vavilthota
                 char other_buf[1000];
-                for(int i = 0; i < 47; i++){
+                for(int i = 0; i < 48; i++){
                 
                 while(read(serverSocket, other_buf, sizeof(other_buf)) == 0){
         
                 }
-                printf("%s",other_buf);fflush(stdout);
+                printf("%s",other_buf);
 
                 }
-                buffer[0] = 0;
+                
+                // Added by Venkata Ragavendra Vavilthota
             	}
 
             	if(strcmp(buffer, "2") == 0){
-                	printf("Customer chose: 2. Making specific jewelry inguiry\n");fflush(stdin);
+                	printf("Customer chose: 2. Making specific jewelry inguiry\n");
 
                 // Added by Venkata Ragavendra Vavilthota
                 // Get the reference number from client
@@ -107,15 +109,20 @@ int main(int argc, char const *argv[])
 
                 	}
                   printf("%s", server_msg);
+                
+
                 	// Added by Venkata Ragavendra Vavilthota
             	}
 
             	if(strcmp(buffer, "3") == 0){
-                	printf("Customer chose: 3. Making purchase\n");fflush(stdin);
+                	printf("Customer chose: 3. Making purchase\n");
+                
             	}
 
             	if(strcmp(buffer, "4") == 0){
-                	printf("4. Returning the purchase\n");fflush(stdin);
+                	printf("4. Returning the purchase\n");
+                
+
             	}
 
             	if(strcmp(buffer, "5") == 0){
@@ -123,7 +130,8 @@ int main(int argc, char const *argv[])
 
                 	}
                 	//display server message
-                	printf("This is %s", buffer);fflush(stdin);
+                	printf("This is %s", buffer);
+                
                 	return 0;
             	}
 
@@ -159,7 +167,7 @@ int main(int argc, char const *argv[])
                 
             	}
             	printf("%s", buffer);
-            	fflush(stdout);
+            	fflush(stdin);
             	return 0;
         	}
     	}

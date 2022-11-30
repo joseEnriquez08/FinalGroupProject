@@ -95,7 +95,7 @@ void *handleConnection(void* pClientSocket, int shopAssitantID){
 		printf("Error in Reading Cartier_catalog.txt\n");exit(1);
 	}
   // Added by Venkata Ragavendra Vavilthota
-  
+
 	//client output when shop assitant is free to handle client/customer
 	sprintf(buffer, "Welcome to the shop..\n\n"
     	"I am Shop Assistant #%d currently serving you.\n\n"
