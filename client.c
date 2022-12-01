@@ -83,11 +83,11 @@ int main(int argc, char const *argv[])
 
                 }
                 
-                  char server_msg[1000];
-                  while(read(serverSocket, server_msg, sizeof(server_msg)) == 0){
+                  char server_msg1[1000];
+                  while(read(serverSocket, server_msg1, sizeof(server_msg1)) == 0){
 
                 	}
-                  printf("%s", server_msg);
+                  printf("%s", server_msg1);
                 
                 // Added by Venkata Ragavendra Vavilthota
             	}
@@ -110,11 +110,11 @@ int main(int argc, char const *argv[])
                 	//display reference data from server
                 	printf("%s", client_rcvmsg);
 
-                  char server_msg[1000];
-                  while(read(serverSocket, server_msg, sizeof(server_msg)) == 0){
+                  char server_msg2[1000];
+                  while(read(serverSocket, server_msg2, sizeof(server_msg2)) == 0){
 
                 	}
-                  printf("%s", server_msg);
+                  printf("%s", server_msg2);
                 
 
                 	// Added by Venkata Ragavendra Vavilthota
@@ -140,11 +140,11 @@ int main(int argc, char const *argv[])
                 	printf("%s", client_buymsg);
                 
                 // Read question from server
-                 char server_msg[1000];
-                  while(read(serverSocket, server_msg, sizeof(server_msg)) == 0){
+                 char server_msg3[1000];
+                  while(read(serverSocket, server_msg3, sizeof(server_msg3)) == 0){
 
                 	}
-                  printf("%s", server_msg);
+                  printf("%s", server_msg3);
                 // Added by Venkata Ragavendra Vavilthota
                 
             	}
@@ -161,19 +161,20 @@ int main(int argc, char const *argv[])
                   // send the data to server
                   write(serverSocket, buf_ret, sizeof(buf_ret));
                 
+                  //display reference data from server
                   char client_retmsg[1000];
                 	while(read(serverSocket, client_retmsg, sizeof(client_retmsg)) == 0){
 
                 	}
-                	//display reference data from server
+                	
                 	printf("%s", client_retmsg);
                 
-                //Read the ques from sever
-                 char server_msg[1000];
-                  while(read(serverSocket, server_msg, sizeof(server_msg)) == 0){
+                 //Read the ques from sever
+                 char server_msg4[1000];
+                  while(read(serverSocket, server_msg4, sizeof(server_msg4)) == 0){
 
                 	}
-                  printf("%s", server_msg);
+                  printf("%s", server_msg4);
                 // Added by Venkata Ragavendra Vavilthota
 
             	}

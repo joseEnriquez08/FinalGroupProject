@@ -32,7 +32,8 @@
 #include "include.h"
 #include "get_Jewelfunc.h"
 #include "readFile.h"
-
+#include "return_Jewelfunc.h"
+#include "purchase_Jewelfunc.h"
 
 #define SOCKETERROR (-1)
 #define SERVER_BACKLOG 100
@@ -157,7 +158,7 @@ sprintf(buffer_other,"\n%s\t%s\t%s\t%s\t%s\t%d\n",catalogstr[i].ref,catalogstr[i
 
           }
           printf("This is client reference number %s\n",client_ref);
-          char sendDetails[1000] = {123};
+          char sendDetails[1000];
 
     			struct Catalog CatalogStruct =  getJewelfunc(client_ref);      sprintf(sendDetails,"Ref\tCategory\tTitle\tTags\tDescription\tPrice\n%s\t%s\t%s\t%s\t%s\t%d",CatalogStruct.ref,CatalogStruct.category,CatalogStruct.title,CatalogStruct.tags,CatalogStruct.description,CatalogStruct.price);
         
@@ -189,13 +190,15 @@ sprintf(buffer_other,"\n%s\t%s\t%s\t%s\t%s\t%d\n",catalogstr[i].ref,catalogstr[i
           while(read(clientSocket, client_buy, sizeof(client_buy)) == 0){
 
           }
-          printf("This is client reference number to buy is %s\n",client_buy);
-        
-          char buy_details[1000];
-          sprintf(buy_details,"Bought");
-          // Sending the reference details
-          check(write(clientSocket, buy_details, sizeof(buy_details)), "Sending/Writing failed");
-    
+
+          // Sending the purchase details
+          char* purchased = purchaseJewelfunc(client_buy);
+//          printf("%s",purchased);
+
+          char purchase_details[1000];
+          sprintf(purchase_details, "%s",purchased);
+          check(write(clientSocket, purchase_details, sizeof(purchase_details)), "Sending/Writing failed");
+
           //client output when shop assitant is free to handle client/customer
           char client_qus[1000];
           sprintf(client_qus, "\n\nPlease choose the option below:\n\n"
@@ -214,19 +217,23 @@ sprintf(buffer_other,"\n%s\t%s\t%s\t%s\t%s\t%d\n",catalogstr[i].ref,catalogstr[i
 
     	if(strcmp(buffer, "4") == 0){
         	printf("Customer chose: 4. Returning the purchase\n");fflush(stdout);
-        
+
           // Added by Venkata Ragavendra Vavilthota
           // Getting client ref number
           char client_return[20];
           while(read(clientSocket, client_return, sizeof(client_return)) == 0){
 
           }
-          printf("This is client reference number to buy is %s\n",client_return);
+          printf("This is client reference number to return is %s\n",client_return);
+
           // Sending the return details
+          char* returned = returnJewelfunc(client_return);
+//          printf("%s",returned);
+
           char return_details[1000];
-          sprintf(return_details," Reurned");
+          sprintf(return_details, "%s",returned);
           check(write(clientSocket, return_details, sizeof(return_details)), "Sending/Writing failed");
-        
+
           //client output when shop assitant is free to handle client/customer
           char client_qus[1000];
           sprintf(client_qus, "\n\nPlease choose the option below:\n\n"
