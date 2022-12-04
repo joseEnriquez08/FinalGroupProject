@@ -272,6 +272,31 @@ int main(int argc, char const *argv[])
         }
         if(setting == 2){
             //handled by waiting room
+            //handled by sofa
+
+            fullread(serverSocket, buffer, sizeof(buffer));
+            printf("%s", buffer);
+            fflush(stdout);
+            buffer[0] = 0;
+
+            //client chooses to either leave or wait and sends responce to server
+            fgets(buffer, sizeof(buffer), stdin);
+            buffer[strlen(buffer)-1] = '\0';
+            fullwrite(serverSocket, buffer, sizeof(buffer));
+            fflush(stdout);
+            //buffer[0] = 0;
+
+            if(strcmp(buffer, "0") == 0){
+                //client wants to wait
+            }
+            if(strcmp(buffer, "1") == 0){
+                //client wants to leave
+            
+                fullread(serverSocket, buffer, sizeof(buffer));
+                printf("%s", buffer);
+                fflush(stdout);
+                return 0;
+            }
         }
         if(setting == 3){
             //no room in shop getting booted or you chose to leave

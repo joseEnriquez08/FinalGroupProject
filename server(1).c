@@ -61,6 +61,7 @@ pthread_mutex_t waitLock = PTHREAD_MUTEX_INITIALIZER;
 
 pthread_mutex_t catalogLock = PTHREAD_MUTEX_INITIALIZER;
 
+
 //condition variables let threads wait for some condition to occur
 pthread_cond_t assitantConditionVar = PTHREAD_COND_INITIALIZER;
 pthread_cond_t sofaConditionVar = PTHREAD_COND_INITIALIZER;
@@ -329,7 +330,7 @@ void *threadFuncSofa(void *arg){
     sofaInitializer++;
     int sofaID = sofaInitializer;
     pthread_mutex_unlock(&sofaLock);
-   
+
     //thread enters infinite loop of handling clients and checking for available clients
     while(1){
 
@@ -345,7 +346,7 @@ void *threadFuncSofa(void *arg){
             //new client
             clientNode = dequeue(&sofaQueue);
         }
-        
+
         pthread_mutex_unlock(&sofaLock);
 
         if(clientNode == NULL){
@@ -356,10 +357,6 @@ void *threadFuncSofa(void *arg){
         
 
         if(clientNode != NULL){
-            if(clientNode->waitID > 0){
-                printf("Signaling %d\n", clientNode->waitID);
-                pthread_cond_signal(&waitOccupiedConditionVariables[clientNode->waitID-1]);
-            }
 
             int clientSocket = (clientNode->clientSocket);
             //sends 1 to the client notifying them they are being handled by a sofa
@@ -412,6 +409,7 @@ void *threadFuncSofa(void *arg){
     }
 }
 
+
  //////////////////////////////////////////////////////////////////////////////////////////
 
 //Thread function to allow wait threads to grab and handle clients. Notice the infinite loop. This allows the thread/wait to be reused for more clients.
@@ -454,7 +452,7 @@ void *threadFuncWaiting(void *arg){
             int clientSocket = (clientNode->clientSocket);
             //sends 1 to the client notifying them they are being handled by a sofa
             char buffer[BUFSIZE] = {0};
-            sprintf(buffer, "%d", 2);
+            sprintf(buffer, "%d", 1);
             check(fullwrite(clientSocket, buffer, sizeof(buffer)), "Sending/Writing failed");
             buffer[0] = 0;
             fflush(stdout);
@@ -463,9 +461,9 @@ void *threadFuncWaiting(void *arg){
             sprintf(buffer, "All the shop assitants are currently busy assisting the customers.\n\n"
                 "You are placed in the waiting room.\n\n"
                 "Your current number in the waiting list is %d.\n\n"
-                "All sofas are occupied.. Please stand in the waiting room..\n\n"
+                "Waiting #: %d\n\n"
                 "Do you want to wait or want to leave the shop?\n"
-                "Enter 0 for waiting or 1 to leave\n", clientNode->index + assitantQueue.qSize+1);
+                "Enter 0 for waiting or 1 to leave\n", clientNode->index+1, waitID);
 
             check(fullwrite(clientSocket, buffer, sizeof(buffer)), "Sending/Writing failed");
             buffer[0] = 0;
@@ -502,6 +500,8 @@ void *threadFuncWaiting(void *arg){
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
+
+
 
 
 /// @brief function to disconnect client when there is no room
@@ -553,17 +553,9 @@ int main(int argc, char const *argv[])
     sofaOccupiedLocks = calloc(sofaAmount, sizeof(pthread_mutex_t));
     sofaOccupiedConditionVariables = calloc(sofaAmount, sizeof(pthread_cond_t));
 
-    waitOccupiedLocks = calloc(waitingSpots, sizeof(pthread_mutex_t));
-    waitOccupiedConditionVariables = calloc(waitingSpots, sizeof(pthread_cond_t));
-
     for(int i = 0; i < sofaAmount; i++){
         pthread_mutex_init(&sofaOccupiedLocks[i], NULL);
         pthread_cond_init(&sofaOccupiedConditionVariables[i], NULL);
-    }
-
-    for(int i = 0; i < waitingSpots; i++){
-        pthread_mutex_init(&waitOccupiedLocks[i], NULL);
-        pthread_cond_init(&waitOccupiedConditionVariables[i], NULL);
     }
 
     pthread_t threadPool [threadPoolSize];
@@ -588,11 +580,6 @@ int main(int argc, char const *argv[])
     //creates threads based on the amount of sofas
     for(int i = shopAssitants; i < shopAssitants + sofaAmount; i++){
         pthread_create(&threadPool[i], &att, threadFuncSofa, NULL);
-    }
-
-    //creates threads based on the amount of waiting spots that arnt sofas
-    for(int i = sofaAmount; i < maxWaitingRoom; i++){
-        pthread_create(&threadPool[i], &att, threadFuncWaiting, NULL);
     }
 
 
@@ -688,7 +675,6 @@ int main(int argc, char const *argv[])
 
             //pthread_mutex_unlock(&queueLock);
         }
-        
 
     }
 
