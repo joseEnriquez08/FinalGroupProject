@@ -29,8 +29,8 @@ void getJewelfunc(int clientSocket) {
   // loops through inventory to find matching ref
   for (int i = 0; i < 46; i++) {
     if (strcmp(catalogstr[i].ref, buffer) == 0) {
-      // found matching ref, item exists
-      // sends client info about item
+
+      // sends the data about the item to the client
       sprintf(buffer,
               "Ref:\t %12s\n"
               "Category: %11s\n"
@@ -53,13 +53,12 @@ void getJewelfunc(int clientSocket) {
   pthread_mutex_unlock(&catalogLock);
 
   if (!isfound) {
-    // ref was not found. Notifying client
-    sprintf(buffer, "Invalid reference number");
+    // item was not found
+    sprintf(buffer, "Invalid reference number. Please the correct ref number.");
     check(fullwrite(clientSocket, buffer, sizeof(buffer)),
           "Sending/Writing failed");
   }
-  
-  
+
   return;
 }
 
