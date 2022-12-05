@@ -480,12 +480,14 @@ void *threadFuncWaiting(void *arg){
 
             if(strcmp(buffer, "0") == 0){
                 printf("Client %d wants to wait, Waiting: %d\n", clientNode->index+1, waitID);
-                pthread_mutex_lock(&sofaQueueLock);
+                //pthread_mutex_lock(&sofaQueueLock);
                 clientNode->waitID = waitID;
                 //stores the client socket in the queue
+                printf("Sofa queue size: %d\n", sofaQueue.qSize);
                 enqueueFromWaiting(clientNode->clientSocket, waitID, &sofaQueue);
+                printf("Sofa queue size: %d\n", sofaQueue.qSize);
                 //enqueue(clientNode->clientSocket, &assitantQueue);
-                pthread_mutex_unlock(&sofaQueueLock);
+                //pthread_mutex_unlock(&sofaQueueLock);
                 printf("Waiting on waitID: %d\n", waitID);
                 pthread_cond_wait(&waitOccupiedConditionVariables[waitID-1], &waitOccupiedLocks[waitID-1]);
             }
@@ -674,12 +676,13 @@ int main(int argc, char const *argv[])
                 pthread_cond_signal(&sofaConditionVar);
             }
 
-            else if(assitantQueue.qSize = sofaAmount && assitantQueue.qSize <= maxWaitingRoom){
+            else {//if(assitantQueue.qSize = sofaAmount && assitantQueue.qSize <= maxWaitingRoom){
 
                 pthread_mutex_lock(&waitingQueueLock);
                 clientAmount++;
                 //stores the client socket in the queue
                 enqueue(clientSocket, &waitingRoomQueue);
+                printf("Waiting room queue size %d\n", waitingRoomQueue.qSize);
                 pthread_mutex_unlock(&waitingQueueLock);
 
                 //client needs a sofa, so a signal is sent to a shop assitant thread
