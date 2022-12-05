@@ -1,12 +1,13 @@
 // Author: Venkata Ragavendra Vavilthota
 // Email: venkat_ragav.vavilthota@okstate.edu
-// Date: 11/15/2022
+// Date: 12/01/2022
 // Description: This file gets and returns the data based on refnum
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <pthread.h>
+#include <stdbool.h>
 #include <unistd.h>
 
 #include "include.h"
@@ -15,7 +16,7 @@ void getJewelfunc(int clientSocket) {
   char buffer[BUFSIZE] = {0};
 
   // boolean variable to check if item has been found;
-  int found = 0;
+  bool isfound = false;
 
   // writes to client asking for specific ref and reads their input
   sprintf(buffer, "Please enter the specific ref\n");
@@ -24,7 +25,7 @@ void getJewelfunc(int clientSocket) {
   buffer[0] = 0;
   check(fullread(clientSocket, buffer, sizeof(buffer)), "Reading failed");
 
-//   pthread_mutex_lock(&catalogLock);
+  pthread_mutex_lock(&catalogLock);
   // loops through inventory to find matching ref
   for (int i = 0; i < 46; i++) {
     if (strcmp(catalogstr[i].ref, buffer) == 0) {
@@ -45,18 +46,20 @@ void getJewelfunc(int clientSocket) {
             "Sending/Writing failed");
 
       // changes boolean variable
-      found = 1;
+      isfound = true;
       break;
     }
   }
-//   pthread_mutex_unlock(&catalogLock);
+  pthread_mutex_unlock(&catalogLock);
 
-  if (found == 0) {
+  if (!isfound) {
     // ref was not found. Notifying client
-    sprintf(buffer, "Invalid ref");
+    sprintf(buffer, "Invalid reference number");
     check(fullwrite(clientSocket, buffer, sizeof(buffer)),
           "Sending/Writing failed");
   }
+  
+  
   return;
 }
 

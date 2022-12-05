@@ -1,15 +1,13 @@
 //Author: Jose Enriquez
 //Email: jose.enriquez@okstate.edu
 //Date: 10/25/2022
-//Description: This program simulates a jewelry shop by running a multithreaded server using a threadpool. Threadpool being an implementation where there is a set number of threads and you resuse them.
-//              This threadpool in this program is split into 3 sets of threads. One set for shop assitants, one set for sofas, and one for the remaining spots in the waiting list.
-//              The clients/connections represent the customers. The connections/clients are stored in a FIFO Queue. As the clients connect to the server, they are enqueued in a linkedList
-//              implementation of a queue. As the shop assitants/threads become available, they dequeue the clients and handle them. If the shop assitant threads are busy and the amount of
-//              clients falls in the range of sofa amount, the sofa threads will then handle the clients and ask if they want to leave or wait. If all the sofa threads are
-//              occupied, then the remaining waiting room threads will handle the clients and ask if they want to leave or wait. The sofa and waiting room threads will only remove clients
-//              from the queue if they choose to leave. This differs from the shop assitant threads that dequeue the clients to talk to them. If there is no room, the client will be booted.
-//              The threads will never terminate, they either a.) handle a client, or b.) continuously check for available clients in the queue.
-//              All shop assitant threads will be using the data stored in the array of structs called: "items". This is data from the text file cartier_catalog_.txt
+//Description: This program simulates a jewelry shop by running a multithreaded server using a threadpool. Threadpool being an implementation where there is a set number of threads and you reuse them. 
+//				This threadpool in this program is split into 3 sets of threads. One set for shop assistants, one set for sofas, and one for the remaining spots in the waiting list. The clients/connections represent 
+//				the customers. The connections/clients connect to the server, they are enqueued in 3 separate queues depending on the amount of customers already connected to the jewelry shop. As the threads become 
+//				available, they dequeue the clients and handle them. The shop assistant threads dequeue clients from one specific queue. If the shop assistant threads are busy and the amount of clients falls in the
+//				range of sofa amount, clients will be enqueued in a queue specific to sofa threads. The sofa threads will then handle the clients and ask if they want to leave or wait. If they want to wait, those 
+//				clients get enqueued into the shop assistant queue. If all the sofa threads are occupied, then the remaining waiting room threads will handle the clients and ask if they want to leave or wait. If they want to wait, they will get enqueued into the sofa queue, and a sofa will be assigned to them once they get dequeued.If there is no room, the client will be booted. The threads will never terminate, they either a.) handle a client, or b.) continuously check for available clients in their specific queue. All shop assistant threads will be using the data stored in the array of structs called: "Catalog". This is data from the text file cartier_catalog_.txtIf there are clients standing, they will get passed from the waiting room thread, to a sofa thread, to a shop assistant thread.
+
 
 // Command line arguments: a.out, Number of shop assitants, number of sofas, number of remaing waiting spots.
 
@@ -28,7 +26,7 @@
 //      (1) Before a client connects to a sofa thread, the program works as intended. The shop assitants are handling the clients on a first come first serve basis. And the threads are being
 //           resused
 
-
+#include <stdbool.h>
 #include "include.h"
 #include "readFile.h"
 #include "get_AllJewelfunc.h"
@@ -63,7 +61,7 @@ pthread_mutex_t sofaLock = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t shopAssitantLock = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t waitLock = PTHREAD_MUTEX_INITIALIZER;
 
-//pthread_mutex_t catalogLock = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t catalogLock = PTHREAD_MUTEX_INITIALIZER;
 
 
 //condition variables let threads wait for some condition to occur
@@ -198,6 +196,7 @@ void *handleConnection(int pClientSocket, int shopAssitantID){
     //loop to conituously and infinitely read from client
     while(1){
 
+
         //reads client output
         fullread(clientSocket, buffer, sizeof(buffer));
 
@@ -205,6 +204,7 @@ void *handleConnection(int pClientSocket, int shopAssitantID){
             printf("Customer chose: 1. Looking at the jewelry menu\n");
             getAllJewelfunc(clientSocket);
             //printItems(items);
+          
         }
 
         if(strcmp(buffer, "2") == 0){
@@ -537,7 +537,7 @@ void disconnectClientDueToFullRoom(int clientSocket){
 int main(int argc, char const *argv[])
 {
     //initialize the data to be shared among the threads
-    items = parseData();
+//     items = parseData();
     assitantQueue.qSize = 0;
     sofaQueue.qSize = 0;
     waitingRoomQueue.qSize = 0;
@@ -620,7 +620,7 @@ int main(int argc, char const *argv[])
 
         if(clientAmount >= threadPoolSize){
             //there is no space available in the shop, need to disconnect client.
-            printf("%d > %d\n", clientAmount, threadPoolSize);
+            //printf("%d > %d\n", clientAmount, threadPoolSize);
             disconnectClientDueToFullRoom(clientSocket);
 
         } else {
@@ -632,7 +632,7 @@ int main(int argc, char const *argv[])
 
             //clientAmount++;
             //prints the amount of clients in comparison to threadpool size (used for debugging and testing)
-            printf("%d <= %d\n", clientAmount, threadPoolSize);
+            //printf("%d <= %d\n", clientAmount, threadPoolSize);
             
 
             //prints the rest of the queue(used for debugging and testing)

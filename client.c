@@ -34,7 +34,6 @@ ssize_t fullwrite(int fd, const void *buf, size_t len){
 		case -1: return -1;
 		case 0: return total;
 		default: total += r;
-	
 		}
 	}
 	return total;
@@ -147,9 +146,9 @@ int main(int argc, char const *argv[])
                     printf("%s", buffer);
                     buffer[0] = 0;
 
-                    //write purchase amount to server
+                    //write purchase Quantity to server
                     fgets(buffer, sizeof(buffer), stdin);
-                    int purchaseAmount = (int) strtol(buffer, NULL, 10);
+                    int purchaseQnty = (int) strtol(buffer, NULL, 10);
                     fullwrite(serverSocket, buffer, sizeof(buffer));
                     buffer[0] = 0;
 
@@ -160,7 +159,7 @@ int main(int argc, char const *argv[])
 
                     //loop to send refs to server
 
-                    for(int i = 0; i < purchaseAmount;i++){
+                    for(int i = 0; i < purchaseQnty;i++){
                         fgets(buffer, sizeof(buffer), stdin);
                         buffer[strlen(buffer) - 1] = '\0';
                         //removes the new line character
@@ -173,7 +172,7 @@ int main(int argc, char const *argv[])
                     printf("\n");
 
                     //Loop to read receipt from server
-                    for(int i=0; i < (purchaseAmount) +1 ; i++){
+                    for(int i=0; i < (purchaseQnty) +1 ; i++){
 
                         fullread(serverSocket, buffer, sizeof(buffer));
                         printf("%s", buffer);
@@ -189,9 +188,9 @@ int main(int argc, char const *argv[])
                     printf("%s", buffer);
                     buffer[0] = 0;
 
-                    //write return amount to server
+                    //write return Quantity to server
                     fgets(buffer, sizeof(buffer), stdin);
-                    int returnAmount = (int) strtol(buffer, NULL, 10);
+                    int returnQnty = (int) strtol(buffer, NULL, 10);
                     fullwrite(serverSocket, buffer, sizeof(buffer));
                     buffer[0] = 0;
 
@@ -202,7 +201,7 @@ int main(int argc, char const *argv[])
 
                     //loop to send refs to server
 
-                    for(int i = 0;i < returnAmount;i++){
+                    for(int i = 0;i < returnQnty;i++){
                         fgets(buffer, sizeof(buffer), stdin);
                         buffer[strlen(buffer) - 1] = '\0';
                         //removes the new line character
@@ -214,7 +213,7 @@ int main(int argc, char const *argv[])
 
                     //Loop to read return log from server
                     printf("\n");
-                    for(int i = 0; i < returnAmount; i++){
+                    for(int i = 0; i < returnQnty; i++){
 
                         fullread(serverSocket, buffer, sizeof(buffer));
                         printf("%s", buffer);

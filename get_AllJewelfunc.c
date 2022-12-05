@@ -1,6 +1,6 @@
-//Author: Venkata Ragavendra Vavilthota
-//Email: venkat_ragav.vavilthota@okstate.edu
-//Date: 11/15/2022
+//Author:Ganesh Mahendra Prabhu
+//Email:ganesh.prabhu@okstate.edu
+//Date: 12/01/2022
 //Description: This file gets and returns the data based on refnum
 
 
@@ -9,13 +9,14 @@
 #include <stdlib.h>
 #include <string.h>
 #include <pthread.h>
+#include <stdbool.h>
 #include <unistd.h>
 
 #include "include.h"
 
 void getAllJewelfunc(int clientSocket){
     char buffer[BUFSIZE] = {0};
-//     pthread_mutex_lock(&catalogLock);
+    pthread_mutex_lock(&catalogLock);
 
     sprintf(buffer,"Ref\t\tCategory\t\tTitle\t\tTags\t\tPrice\n");
     check(fullwrite(clientSocket, buffer, sizeof(buffer)), "Sending/Writing failed");
@@ -27,7 +28,7 @@ void getAllJewelfunc(int clientSocket){
         //sends item to client;
         check(fullwrite(clientSocket, buffer, sizeof(buffer)), "Sending/Writing failed");
     }
-//     pthread_mutex_unlock(&catalogLock);
+    pthread_mutex_unlock(&catalogLock);
 }
 
 // int main(int argc, char *argv[]){

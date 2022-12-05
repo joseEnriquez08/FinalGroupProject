@@ -1,7 +1,7 @@
-//Author: Venkata Ragavendra Vavilthota
-//Email: venkat_ragav.vavilthota@okstate.edu
-//Date: 11/15/2022
-//Description: This file gets and returns the data based on refnum
+//Author: Bhanu Teja Solipeta 
+//Email: bhanu.solipeta@okstate.edu
+//Date: 12/01/2022
+//Description: This file gets teh refnum and returns the items to the store
 
 
 
@@ -10,6 +10,7 @@
 #include <string.h>
 #include <pthread.h>
 #include <unistd.h>
+#include <stdbool.h>
 #include "include.h"
 
 
@@ -45,19 +46,19 @@ void returnJewelFunc(int clientSocket, struct Catalog clientPurchases[]){
         itemsToReturn[i].length = returnAmount;
     }
 
-//    pthread_mutex_lock(&catalogLock);
+   pthread_mutex_lock(&catalogLock);
     //boolean variable to check if item ahs been found
-    int found = 0;
+    bool isfound = false;
 
     //for each ref entered by the client, loopp through inventory to check if its valid
     for(int i = 0; i < itemsToReturn->length; i++){
-        found = 0;
+        isfound = false;
         for(int j = 0; j < 46; j++){
 
             if(strcmp(itemsToReturn[i].str, catalogstr[j].ref) == 0 && clientPurchases[j].quantity > 0){
                 //client has purchased it before. and item has been found. valid to return.
 
-                found = 1;
+                isfound = true;
 
                 //decrement item quantity from clientPurchases to keep track of purchases and returns.
                 clientPurchases[j].quantity--;
@@ -77,7 +78,7 @@ void returnJewelFunc(int clientSocket, struct Catalog clientPurchases[]){
                 clientPurchases[j].quantity == 0){
                 //client has not purchased this before, so they cant return it
 
-                found = 1;
+                isfound = true;
 
                 //writes to client telling them they have not purchase this before
                 sprintf(buffer, "Invalid return. Item: \"%s\" has not been purchased by you\n",
@@ -88,7 +89,7 @@ void returnJewelFunc(int clientSocket, struct Catalog clientPurchases[]){
 
         }
 
-        if(found == 0){
+        if(!isfound){
             //does not exist;
 
             //writes to client telling them the item they tried to return does not exist
@@ -99,7 +100,7 @@ void returnJewelFunc(int clientSocket, struct Catalog clientPurchases[]){
         }
 
     }
-//    pthread_mutex_unlock(&catalogLock);
+   pthread_mutex_unlock(&catalogLock);
 }
 
 

@@ -30,7 +30,6 @@
 #define BUFSIZE 4086
 
 
-
 //model for client node
 struct node {
     struct node* next;
