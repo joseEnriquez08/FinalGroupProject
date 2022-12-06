@@ -31,7 +31,7 @@
 
 #include <stdbool.h>
 #include "include.h"
-#include "readFile.h"
+// #include "readFile.h"
 #include "get_AllJewelfunc.h"
 #include "get_Jewelfunc.h"
 #include "purchase_Jewelfunc.h"
@@ -40,6 +40,9 @@
 
 #define SOCKETERROR (-1)
 #define SERVER_BACKLOG 100
+
+//Keeps the items in this struct
+struct Catalog catalogstr[46];
 
 //keeps track of threads and amount of clients
 int clientAmount = 0;
@@ -425,7 +428,7 @@ void *threadFuncWaiting(void *arg){
     waitingInitializer++;
     int waitID = waitingInitializer;
     pthread_mutex_unlock(&waitLock);
-   
+
     //thread enters infinite loop of handling clients and checking for available clients
     while(1){
 
@@ -434,12 +437,11 @@ void *threadFuncWaiting(void *arg){
 
         if((clientNode = dequeue(&waitingRoomQueue)) == NULL){
             //no clients need sofa
-
             //thread waits until a client is added to the queue
             pthread_cond_wait(&waitingConditionVar, &waitingQueueLock);
-
             //new client
             clientNode = dequeue(&waitingRoomQueue);
+
         }
 
         pthread_mutex_unlock(&waitLock);
@@ -449,7 +451,6 @@ void *threadFuncWaiting(void *arg){
             printf("Wait Queue is null\n");
             continue;
         }
-        
 
         if(clientNode != NULL){
 
@@ -478,7 +479,7 @@ void *threadFuncWaiting(void *arg){
 
             // }
             fullread(clientSocket, buffer, sizeof(buffer));
-            printf("Reach\n");
+            printf("Reach -- 1\n");
 
             if(strcmp(buffer, "0") == 0){
                 printf("Client %d wants to wait, Waiting: %d\n", clientNode->index+1, waitID);
@@ -577,7 +578,7 @@ int main(int argc, char const *argv[])
     int serverSocket;
     int clientSocket;
     int addrSize;
-    
+
     struct sockaddr_in clientAddr;
 
     //Had to change stack size for each thread. Otherwize, id be getting a segementation fault error on my system.
@@ -684,6 +685,7 @@ int main(int argc, char const *argv[])
 
                 pthread_mutex_lock(&waitingQueueLock);
                 clientAmount++;
+                
                 //stores the client socket in the queue
                 enqueue(clientSocket, &waitingRoomQueue);
                 printf("Waiting room queue size %d\n", waitingRoomQueue.qSize);

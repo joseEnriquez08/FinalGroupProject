@@ -1,6 +1,6 @@
 //Author: Venkata Ragavendra Vavilthota
 //Email: venkat_ragav.vavilthota@okstate.edu
-//Date: 11/12/2022
+//Date: 12/01/2022
 //Description: This file keeps all the parsed data in the struct
 
 #ifndef READFILE_H_
@@ -17,7 +17,7 @@ struct Catalog{
 	int price;
 };
 
-struct Catalog catalogstr[46];	//array of catalog
+extern struct Catalog catalogstr[46];	//array of catalog
 
 int readFile();
 
