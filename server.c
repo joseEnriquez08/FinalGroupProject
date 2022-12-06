@@ -1,13 +1,15 @@
 //Author: Jose Enriquez
 //Email: jose.enriquez@okstate.edu
 //Date: 10/25/2022
-//Description: This program simulates a jewelry shop by running a multithreaded server using a threadpool. Threadpool being an implementation where there is a set number of threads and you reuse them. 
-//				This threadpool in this program is split into 3 sets of threads. One set for shop assistants, one set for sofas, and one for the remaining spots in the waiting list. The clients/connections represent 
-//				the customers. The connections/clients connect to the server, they are enqueued in 3 separate queues depending on the amount of customers already connected to the jewelry shop. As the threads become 
-//				available, they dequeue the clients and handle them. The shop assistant threads dequeue clients from one specific queue. If the shop assistant threads are busy and the amount of clients falls in the
-//				range of sofa amount, clients will be enqueued in a queue specific to sofa threads. The sofa threads will then handle the clients and ask if they want to leave or wait. If they want to wait, those 
-//				clients get enqueued into the shop assistant queue. If all the sofa threads are occupied, then the remaining waiting room threads will handle the clients and ask if they want to leave or wait. If they want to wait, they will get enqueued into the sofa queue, and a sofa will be assigned to them once they get dequeued.If there is no room, the client will be booted. The threads will never terminate, they either a.) handle a client, or b.) continuously check for available clients in their specific queue. All shop assistant threads will be using the data stored in the array of structs called: "Catalog". This is data from the text file cartier_catalog_.txtIf there are clients standing, they will get passed from the waiting room thread, to a sofa thread, to a shop assistant thread.
-
+//Description: This program simulates a jewelry shop by running a multithreaded server using a threadpool. Threadpool being an implementation where there is a set number of threads and you resuse them.
+//              This threadpool in this program is split into 3 sets of threads. One set for shop assitants, one set for sofas, and one for the remaining spots in the waiting list.
+//              The clients/connections represent the customers. The connections/clients are stored in a FIFO Queue. As the clients connect to the server, they are enqueued in a linkedList
+//              implementation of a queue. As the shop assitants/threads become available, they dequeue the clients and handle them. If the shop assitant threads are busy and the amount of
+//              clients falls in the range of sofa amount, the sofa threads will then handle the clients and ask if they want to leave or wait. If all the sofa threads are
+//              occupied, then the remaining waiting room threads will handle the clients and ask if they want to leave or wait. The sofa and waiting room threads will only remove clients
+//              from the queue if they choose to leave. This differs from the shop assitant threads that dequeue the clients to talk to them. If there is no room, the client will be booted.
+//              The threads will never terminate, they either a.) handle a client, or b.) continuously check for available clients in the queue.
+//              All shop assitant threads will be using the data stored in the array of structs called: "items". This is data from the text file cartier_catalog_.txt
 
 // Command line arguments: a.out, Number of shop assitants, number of sofas, number of remaing waiting spots.
 
@@ -20,11 +22,12 @@
 //      (1) Assume a client X gets connected to a sofa, and all assitant threads are occupied with other clients. If client x chooses to leave and then another client gets connected to the server.
 //      that new client will be blocked(recieves no data from server). The server will then print out a message saying that a thread detected a null client node. Either "shop assitant detected null"
 //      when calling deque() or "queue is null" when calling getNextNonHandleBySofa(). This should not be happening because im (supposedly) ensuring the threads dont continue until the queue is non-empty
-//
-//
-// Notes:
+//  
+//   
+// Notes: 
 //      (1) Before a client connects to a sofa thread, the program works as intended. The shop assitants are handling the clients on a first come first serve basis. And the threads are being
 //           resused
+
 
 #include <stdbool.h>
 #include "include.h"
@@ -33,6 +36,7 @@
 #include "get_Jewelfunc.h"
 #include "purchase_Jewelfunc.h"
 #include "return_Jewelfunc.h"
+
 
 #define SOCKETERROR (-1)
 #define SERVER_BACKLOG 100
@@ -62,7 +66,6 @@ pthread_mutex_t shopAssitantLock = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t waitLock = PTHREAD_MUTEX_INITIALIZER;
 
 pthread_mutex_t catalogLock = PTHREAD_MUTEX_INITIALIZER;
-
 
 //condition variables let threads wait for some condition to occur
 pthread_cond_t assitantConditionVar = PTHREAD_COND_INITIALIZER;
@@ -115,6 +118,7 @@ ssize_t fullwrite(int fd, const void *buf, size_t len){
 		case -1: return -1;
 		case 0: return total;
 		default: total += r;
+	
 		}
 	}
 	return total;
@@ -142,21 +146,22 @@ ssize_t fullread(int fd, void *buf, size_t len){
 	return total;
 }
 
-/// @brief intitialize items array to keep track of a single clients' purchases/returns
-/// @param arr to be initialized
-// void initializeItemsArray(struct Catalog arr[]){
-//     int size = 46;
-//     char buffer[BUFSIZE] = {0};
-//     sprintf(buffer, "0");
+// @brief intitialize items array to keep track of a single clients' purchases/returns
+// @param arr to be initialized
+void initializeItemsArray(struct item arr[]){
+    int size = 46;
+    char buffer[BUFSIZE] = {0};
+    sprintf(buffer, "0");
 
-//     //copies global store inventory to client inventory
-//     memcpy(clientPurchases, catalogstr, sizeof(struct Catalog)*46);
+    //copies global store inventory to client inventory
+    memcpy(arr, items, sizeof(struct item)*46);
 
-//     //sets all item's quanity in client inventory to 0
-//     for(int i = 0; i < 46; i++){
-//         clientPurchases[i].quantity = 0;
-//     }
-// }
+    //sets all item's quanity in client inventory to 0 
+    for(int i = 0; i < size; i++){
+        strcpy(arr[i].quantity, buffer);
+        arr[i].length = size;
+    }
+}
 
 /// @brief handles clients that are connected to a shop assitant thread
 /// @param pClientSocket //the client socket of client
@@ -204,7 +209,6 @@ void *handleConnection(int pClientSocket, int shopAssitantID){
             printf("Customer chose: 1. Looking at the jewelry menu\n");
             getAllJewelfunc(clientSocket);
             //printItems(items);
-          
         }
 
         if(strcmp(buffer, "2") == 0){
@@ -272,7 +276,7 @@ void *threadFuncShopAssitant(void *arg){
             clientNode = dequeue(&assitantQueue);
 
         }
-
+        
         pthread_mutex_unlock(&assistantQueueLock);
 
         if(clientNode == NULL){
@@ -318,7 +322,6 @@ void removeClient(struct node *client){
     //printQ();
 }
 
-
 /// Thread function to allow sofa threads to grab and handle clients. Notice the infinite loop. This allows the thread/sofa to be reused for more clients.
 void *threadFuncSofa(void *arg){
 
@@ -328,7 +331,7 @@ void *threadFuncSofa(void *arg){
     sofaInitializer++;
     int sofaID = sofaInitializer;
     pthread_mutex_unlock(&sofaLock);
-
+   
     //thread enters infinite loop of handling clients and checking for available clients
     while(1){
 
@@ -344,7 +347,7 @@ void *threadFuncSofa(void *arg){
             //new client
             clientNode = dequeue(&sofaQueue);
         }
-
+        
         pthread_mutex_unlock(&sofaLock);
 
         if(clientNode == NULL){
@@ -352,7 +355,7 @@ void *threadFuncSofa(void *arg){
             printf("Sofa Queue is null\n");
             continue;
         }
-
+        
 
         if(clientNode != NULL){
             if(clientNode->waitID > 0){
@@ -407,10 +410,9 @@ void *threadFuncSofa(void *arg){
             }
 
         }
-
+        
     }
 }
-
 
  //////////////////////////////////////////////////////////////////////////////////////////
 
@@ -454,7 +456,7 @@ void *threadFuncWaiting(void *arg){
             int clientSocket = (clientNode->clientSocket);
             //sends 1 to the client notifying them they are being handled by a sofa
             char buffer[BUFSIZE] = {0};
-            sprintf(buffer, "%d", 1);
+            sprintf(buffer, "%d", 2);
             check(fullwrite(clientSocket, buffer, sizeof(buffer)), "Sending/Writing failed");
             buffer[0] = 0;
             fflush(stdout);
@@ -463,9 +465,9 @@ void *threadFuncWaiting(void *arg){
             sprintf(buffer, "All the shop assitants are currently busy assisting the customers.\n\n"
                 "You are placed in the waiting room.\n\n"
                 "Your current number in the waiting list is %d.\n\n"
-                "Waiting #: %d\n\n"
+                "All sofas are occupied.. Please stand in the waiting room..\n\n"
                 "Do you want to wait or want to leave the shop?\n"
-                "Enter 0 for waiting or 1 to leave\n", clientNode->index+1, waitID);
+                "Enter 0 for waiting or 1 to leave\n", clientNode->index + assitantQueue.qSize+1);
 
             check(fullwrite(clientSocket, buffer, sizeof(buffer)), "Sending/Writing failed");
             buffer[0] = 0;
@@ -480,12 +482,14 @@ void *threadFuncWaiting(void *arg){
 
             if(strcmp(buffer, "0") == 0){
                 printf("Client %d wants to wait, Waiting: %d\n", clientNode->index+1, waitID);
-                pthread_mutex_lock(&sofaQueueLock);
+                //pthread_mutex_lock(&sofaQueueLock);
                 clientNode->waitID = waitID;
                 //stores the client socket in the queue
+                printf("Sofa queue size: %d\n", sofaQueue.qSize);
                 enqueueFromWaiting(clientNode->clientSocket, waitID, &sofaQueue);
+                printf("Sofa queue size: %d\n", sofaQueue.qSize);
                 //enqueue(clientNode->clientSocket, &assitantQueue);
-                pthread_mutex_unlock(&sofaQueueLock);
+                //pthread_mutex_unlock(&sofaQueueLock);
                 printf("Waiting on waitID: %d\n", waitID);
                 pthread_cond_wait(&waitOccupiedConditionVariables[waitID-1], &waitOccupiedLocks[waitID-1]);
             }
@@ -502,8 +506,6 @@ void *threadFuncWaiting(void *arg){
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
-
-
 
 
 /// @brief function to disconnect client when there is no room
@@ -557,9 +559,17 @@ int main(int argc, char const *argv[])
     sofaOccupiedLocks = calloc(sofaAmount, sizeof(pthread_mutex_t));
     sofaOccupiedConditionVariables = calloc(sofaAmount, sizeof(pthread_cond_t));
 
+    waitOccupiedLocks = calloc(waitingSpots, sizeof(pthread_mutex_t));
+    waitOccupiedConditionVariables = calloc(waitingSpots, sizeof(pthread_cond_t));
+
     for(int i = 0; i < sofaAmount; i++){
         pthread_mutex_init(&sofaOccupiedLocks[i], NULL);
         pthread_cond_init(&sofaOccupiedConditionVariables[i], NULL);
+    }
+
+    for(int i = 0; i < waitingSpots; i++){
+        pthread_mutex_init(&waitOccupiedLocks[i], NULL);
+        pthread_cond_init(&waitOccupiedConditionVariables[i], NULL);
     }
 
     pthread_t threadPool [threadPoolSize];
@@ -584,6 +594,11 @@ int main(int argc, char const *argv[])
     //creates threads based on the amount of sofas
     for(int i = shopAssitants; i < shopAssitants + sofaAmount; i++){
         pthread_create(&threadPool[i], &att, threadFuncSofa, NULL);
+    }
+
+    //creates threads based on the amount of waiting spots that arnt sofas
+    for(int i = sofaAmount; i < maxWaitingRoom; i++){
+        pthread_create(&threadPool[i], &att, threadFuncWaiting, NULL);
     }
 
 
@@ -620,7 +635,7 @@ int main(int argc, char const *argv[])
 
         if(clientAmount >= threadPoolSize){
             //there is no space available in the shop, need to disconnect client.
-            //printf("%d > %d\n", clientAmount, threadPoolSize);
+            printf("%d > %d\n", clientAmount, threadPoolSize);
             disconnectClientDueToFullRoom(clientSocket);
 
         } else {
@@ -632,7 +647,7 @@ int main(int argc, char const *argv[])
 
             //clientAmount++;
             //prints the amount of clients in comparison to threadpool size (used for debugging and testing)
-            //printf("%d <= %d\n", clientAmount, threadPoolSize);
+            printf("%d <= %d\n", clientAmount, threadPoolSize);
             
 
             //prints the rest of the queue(used for debugging and testing)
@@ -665,12 +680,13 @@ int main(int argc, char const *argv[])
                 pthread_cond_signal(&sofaConditionVar);
             }
 
-            else if(assitantQueue.qSize = sofaAmount && assitantQueue.qSize <= maxWaitingRoom){
+            else {//if(assitantQueue.qSize = sofaAmount && assitantQueue.qSize <= maxWaitingRoom){
 
                 pthread_mutex_lock(&waitingQueueLock);
                 clientAmount++;
                 //stores the client socket in the queue
                 enqueue(clientSocket, &waitingRoomQueue);
+                printf("Waiting room queue size %d\n", waitingRoomQueue.qSize);
                 pthread_mutex_unlock(&waitingQueueLock);
 
                 //client needs a sofa, so a signal is sent to a shop assitant thread
@@ -679,6 +695,7 @@ int main(int argc, char const *argv[])
 
             //pthread_mutex_unlock(&queueLock);
         }
+        
 
     }
 
